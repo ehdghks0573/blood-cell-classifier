@@ -1,0 +1,11 @@
+# 저장소와 작업 폴더 모두 LF 로 통일한다.
+# add 할 때마다 나오는 "LF will be replaced by CRLF" 경고를 없애고,
+# 다른 PC 에서 받아도 줄바꿈 때문에 파일 전체가 바뀐 것처럼 보이지 않게 한다.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.npz binary
+*.pt  binary
+*.pth binary
+*.ipynb binary

@@ -1,0 +1,13 @@
+# PyTorch 는 CUDA 빌드를 별도 인덱스에서 받아야 한다.
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121
+# GTX 1050 Ti(sm_61) 는 torch 2.5.1+cu121 에서 지원을 확인했다.
+torch==2.5.1
+torchvision==0.20.1
+
+medmnist>=3.0
+scikit-learn>=1.3
+matplotlib>=3.7
+numpy<2
+tqdm>=4.66
+pillow>=10.0
+pytest>=8.0
