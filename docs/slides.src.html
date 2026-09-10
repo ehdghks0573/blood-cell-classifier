@@ -399,7 +399,7 @@ figcaption {
       <h1>백혈구 8종 분류,<br>그리고 <span class="hl" style="color:var(--violet)">남은 2%</span>의 정체</h1>
       <div class="rule"></div>
       <p class="lede">정확도 98%를 넘긴 다음에 물었다 — 남은 2%는 왜 남았을까.<br>
-        모델을 넷 만들어 보니 <strong>같은 27장</strong>을 확신에 차서 틀리고 있었다.</p>
+        모델을 다섯 만들어 보니 <strong>같은 26장</strong>을 확신에 차서 틀리고 있었다.</p>
       <span class="badge">교육 목적 · 임상 진단에 사용할 수 없음</span>
     </div>
     <div class="cover-meta">
@@ -415,7 +415,7 @@ figcaption {
       <div class="figs">
         <div class="fig"><span class="k">최종 성능</span><span class="v">0.9791</span><span class="sub">test macro F1</span></div>
         <div class="fig"><span class="k">틀린 것 중</span><span class="v">83%</span><span class="sub">한 종류의 세포가 껴 있다</span></div>
-        <div class="fig hero"><span class="k">네 모델이 똑같이 틀린 장</span><span class="v">27장</span><span class="sub">우연이라면 0.00장</span></div>
+        <div class="fig hero"><span class="k">다섯 모델이 똑같이 틀린 장</span><span class="v">26장</span><span class="sub">우연이라면 0.00장</span></div>
       </div>
     </div>
   </article></section>
@@ -668,7 +668,7 @@ figcaption {
           </div>
           <div class="ccell focus">
             <img src="{{CELL_case_neutrophil_to_ig}}" alt="실제로 틀린 사례 — 라벨은 호중구, 모델의 답은 미성숙 과립구">
-            <span class="t">실제 오분류 #35</span>
+            <span class="t">실제 오분류 {{ID_case_neutrophil_to_ig}}</span>
             <span class="d">라벨 호중구 · 모델의 답 미성숙 과립구</span>
           </div>
           <div class="ccell">
@@ -720,16 +720,16 @@ figcaption {
     </div>
   </article></section>
 
-  <!-- 12 핵심: 27장 -->
+  <!-- 12 핵심: 공통 오분류 -->
   <section class="stage"><article class="slide">
     <div class="head"><span class="eyebrow">오류 분석 ③ 핵심 발견</span><span class="num">12</span></div>
     <div class="body">
-      <h2>서로 다른 네 모델이<br><span class="hl">같은 27장</span>을 틀린다</h2>
+      <h2>서로 다른 다섯 모델이<br><span class="hl">같은 26장</span>을 틀린다</h2>
       <div class="cols c-5-7">
         <div class="body">
-          <span class="giant">27</span>
+          <span class="giant">26</span>
           <p class="lede">우연히 겹칠 장수는 <strong class="mono">0.00장</strong>.
-            <strong>34,202배</strong>다.</p>
+            <strong>131만 배</strong>다.</p>
           <div class="plain">
             <span class="tag">이게 왜 중요한가</span>
             <p>모델마다 <strong>다른</strong> 장을 틀린다면 원인은 학습의 운이다.
@@ -738,25 +738,30 @@ figcaption {
         </div>
         <div class="body">
           <table class="tbl">
-            <thead><tr><th>모델</th><th>구조</th><th class="n">입력</th><th class="n">시드</th></tr></thead>
+            <thead><tr><th>구조</th><th class="n">입력</th><th class="n">시드</th><th class="n">틀린 장</th></tr></thead>
             <tbody>
-              <tr><td class="name">EfficientNet-B0</td><td>다른 구조</td><td class="n">112px</td><td class="n">42</td></tr>
-              <tr><td class="name">ResNet18</td><td>기준</td><td class="n">112px</td><td class="n">42</td></tr>
-              <tr><td class="name">ResNet18</td><td>기준</td><td class="n">112px</td><td class="n">43</td></tr>
-              <tr><td class="name">ResNet18</td><td>기준</td><td class="n">224px</td><td class="n">42</td></tr>
+              <tr><td class="name">EfficientNet-B0</td><td class="n">112px</td><td class="n">42</td><td class="n">68</td></tr>
+              <tr><td class="name">ResNet50</td><td class="n">112px</td><td class="n">42</td><td class="n">86</td></tr>
+              <tr><td class="name">ResNet18</td><td class="n">112px</td><td class="n">42</td><td class="n">83</td></tr>
+              <tr><td class="name">ResNet18</td><td class="n">112px</td><td class="n">43</td><td class="n">80</td></tr>
+              <tr><td class="name">ResNet18</td><td class="n">224px</td><td class="n">42</td><td class="n">70</td></tr>
             </tbody>
           </table>
           <table class="tbl">
-            <thead><tr><th>확인한 것</th><th class="n">실제</th><th class="n">우연이라면</th></tr></thead>
+            <thead><tr><th>모델을 더 넣으면</th><th class="n">공통 오분류</th></tr></thead>
             <tbody>
-              <tr><td class="name">구조가 다른 둘이 겹친 장</td><td class="n">39</td><td class="n">1.6</td></tr>
-              <tr class="mark"><td class="name">넷이 같은 답으로 틀린 장</td><td class="n">26</td><td class="n">—</td></tr>
-              <tr class="mark"><td class="name">넷 다 90% 이상 확신</td><td class="n">15</td><td class="n">—</td></tr>
+              <tr><td class="name">ResNet18 3개 (시드·해상도만 다름)</td><td class="n">40</td></tr>
+              <tr><td class="name">+ EfficientNet-B0</td><td class="n">27</td></tr>
+              <tr class="mark"><td class="name">+ ResNet50</td><td class="n">26</td></tr>
             </tbody>
           </table>
           <div class="note">
-            <b>시드도, 해상도도, 구조도 원인이 아니다.</b> 남은 공통점은 학습 데이터인데,
-            그것을 배제할 수는 없다 — <b>바로 그게 결론</b>이기 때문이다.
+            <b>줄어들다 멈춘다.</b> 세 번째 구조를 넣었는데 27 → 26, 한 장 줄었다.
+            겹침이 사라지는 게 아니라 <b>단단한 핵에서 멈춘다.</b>
+            <br><br>
+            <b>가장 나쁜 모델을 넣어도 같다.</b> ResNet50 은 성능이 제일 낮고
+            제일 많이 틀리는데(86장), 그 안에 이 26장이 그대로 들어 있다.
+            "덜 좋은 모델이라 더 틀린 것"으로는 설명되지 않는다.
           </div>
         </div>
       </div>
@@ -805,7 +810,7 @@ figcaption {
         <ul>
           <li><strong>확신도 비교 3건은 판정보류.</strong> 틀린 장이 83장뿐이라 통계적으로 가릴 수 없었다.
             "차이가 없다"가 아니라 <strong>"이 표본으로는 말할 수 없다"</strong>이다</li>
-          <li><strong>네 모델이 사전학습을 공유한다.</strong> 마지막 공통점이라 완전히 배제하지 못했다</li>
+          <li><strong>다섯 모델이 사전학습을 공유한다.</strong> 마지막 공통점이라 완전히 배제하지 못했다</li>
           <li><strong>라벨이 틀렸다고 단정하지 않는다.</strong> 전문가 검토가 필요하다</li>
         </ul>
       </div>
@@ -837,7 +842,7 @@ figcaption {
               <strong>그 경계를 외우는 일</strong>이지 모델이 좋아지는 게 아니다.</p>
           </div>
           <p class="mono" style="font-size:1.2cqw;color:var(--muted);">
-            커밋 9 · 테스트 53 · 학습 실행 7 · 성공 기준 6/6</p>
+            커밋 11 · 테스트 70 · 학습 실행 8 · 성공 기준 6/6</p>
         </div>
       </div>
     </div>
@@ -849,7 +854,7 @@ figcaption {
     <div class="body" style="justify-content:center;">
       <h2>"98% 맞혔습니다"는 누구나 한다.<br><span class="hl">남은 2%가 무엇인지 아는 것</span>이<br>이 프로젝트의 결과다.</h2>
       <div class="cover-meta" style="margin-top:1.5cqw;">
-        <span>BloodMNIST 17,092장</span><span>모델 4 · 실행 7</span><span>test macro F1 0.9791</span>
+        <span>BloodMNIST 17,092장</span><span>구조 3 · 실행 8</span><span>test macro F1 0.9791</span>
       </div>
     </div>
   </article></section>

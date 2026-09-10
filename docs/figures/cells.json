@@ -42,8 +42,8 @@
   "case_neutrophil_to_ig": {
     "true": "neutrophil",
     "pred": "immature granulocytes",
-    "index": 35,
-    "min_confidence": 0.9841
+    "index": 839,
+    "min_confidence": 0.9656
   },
   "case_ig_to_monocyte": {
     "true": "immature granulocytes",
@@ -55,6 +55,6 @@
     "true": "immature granulocytes",
     "pred": "neutrophil",
     "index": 1629,
-    "min_confidence": 0.9756
+    "min_confidence": 0.9677
   }
 }

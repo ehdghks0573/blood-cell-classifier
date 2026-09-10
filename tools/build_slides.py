@@ -16,6 +16,7 @@ from __future__ import annotations
 import argparse
 import base64
 import io
+import json
 import sys
 from pathlib import Path
 
@@ -110,6 +111,16 @@ def main(argv: list[str] | None = None) -> int:
         used += 1
     if used:
         print(f"  세포 낱장 {used}장 ({rel(Path(args.figures))})")
+
+    # 사례 번호도 빌더가 채운다. 슬라이드에 "#35" 를 손으로 박아 뒀더니,
+    # 공통 오분류 목록이 바뀌면서 그림은 #839 인데 설명은 #35 가 됐다.
+    # **슬라이드가 자기 근거를 잘못 가리키는 것**은 조용히 지나가는 오류다.
+    cells_json = Path(args.figures) / "cells.json"
+    if cells_json.exists():
+        meta = json.loads(cells_json.read_text(encoding="utf-8"))
+        for key, info in meta.items():
+            if "index" in info:
+                html = html.replace("{{ID_" + key + "}}", f"#{info['index']}")
 
     for token, (template, width, fmt) in FIGURES.items():
         path = ROOT / template.format(run=args.run)
