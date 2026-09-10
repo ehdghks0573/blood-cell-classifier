@@ -66,6 +66,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                         f"= {CLASS_NAMES[DEFAULT_FOCUS]})")
     p.add_argument("--all-classes", action="store_true",
                    help="특정 클래스로 좁히지 않고 전체 혼동 쌍을 본다")
+    p.add_argument("--from-json",
+                   help="tools/consensus_errors.py 가 저장한 JSON. 거기 적힌 장만 그린다 "
+                        "— 여러 모델이 공통으로 틀린 장이라 가장 할 말이 많다")
     p.add_argument("--pairs", type=int, default=4, help="상위 몇 개 혼동 쌍을 그릴지")
     p.add_argument("--per-pair", type=int, default=6, help="쌍마다 몇 장을 볼지")
     p.add_argument("--refs", type=int, default=3, help="대표 이미지 장수")
@@ -187,7 +190,14 @@ def main(argv: list[str] | None = None) -> int:
     y_true, y_pred, probs, _ = predict(model, loader, device)
 
     wrong = np.flatnonzero(y_pred != y_true)
-    if args.all_classes:
+    if args.from_json:
+        # 여러 모델이 공통으로 틀린 장만 남긴다. 이 모델 하나가 틀린 것과
+        # 모든 모델이 틀린 것은 무게가 다르다.
+        consensus = json.loads(Path(args.from_json).read_text(encoding="utf-8"))
+        keep_idx = {c["index"] for c in consensus["cases"]}
+        wrong = np.array([i for i in wrong if int(i) in keep_idx], dtype=int)
+        title = f"{len(consensus['runs'])}개 모델 공통"
+    elif args.all_classes:
         title = "전체"
     else:
         keep = (y_true[wrong] == args.focus) | (y_pred[wrong] == args.focus)
