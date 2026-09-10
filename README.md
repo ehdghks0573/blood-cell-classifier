@@ -58,9 +58,9 @@ GPU 가 없어도 돌아간다 — 자동으로 CPU 로 넘어간다. 다만 학
 ### 전체 재현
 
 ```powershell
-.\tools\run_all.ps1 -Quick     # 3에폭 · 4분 · 파이프라인이 도는지만 확인
-.\tools\run_all.ps1            # 20에폭 · 1시간 30분 · 실제 결과
-.\tools\run_all.ps1 -SkipTrain # 학습 건너뛰고 분석만 다시
+.\tools\run_all.ps1 -Quick     # 3에폭 · 파이프라인이 도는지만 확인
+.\tools\run_all.ps1            # 20에폭 · 실제 결과
+.\tools\run_all.ps1 -SkipTrain # 학습 건너뛰고 분석만 다시 (실측 2분 6초)
 ```
 
 데이터 확인 → 모델 4개 학습 → 평가 → Grad-CAM → 오류 분석 → 발표 자료까지 간다.
