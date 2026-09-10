@@ -1,0 +1,838 @@
+<title>백혈구 분류의 남은 2%</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap">
+
+<style>
+/* ── 팔레트는 혈액 도말 염색에서 가져왔다 ─────────────────────────
+   핵의 보라(hematoxylin), 세포질의 분홍(eosin), 도말 배경의 크림.
+   중성색은 순회색이 아니라 보라 쪽으로 살짝 치우쳐 있다.        */
+:root {
+  --ground:      #F6F2F6;
+  --surface:     #FFFFFF;
+  --surface-2:   #FBF7FA;
+  --ink:         #241A2E;
+  --ink-2:       #4A3D57;
+  --muted:       #736681;
+  --line:        #E2D8E4;
+  --line-2:      #D0C2D4;
+  --accent:      #6D3FA3;
+  --accent-ink:  #57318A;
+  --accent-soft: #EDE4F6;
+  --rose:        #B44C74;
+  --rose-soft:   #F9E6EE;
+  --good:        #2C7355;
+  --good-soft:   #E1F0E8;
+  --shadow:      0 1px 2px rgba(36,26,46,.06), 0 12px 32px rgba(36,26,46,.09);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ground:      #15111B;
+    --surface:     #1D1726;
+    --surface-2:   #241D2F;
+    --ink:         #F0E9F3;
+    --ink-2:       #C9BCD2;
+    --muted:       #9C8DA8;
+    --line:        #342B41;
+    --line-2:      #453A54;
+    --accent:      #B689EC;
+    --accent-ink:  #C9A5F5;
+    --accent-soft: #2C2139;
+    --rose:        #E88BB0;
+    --rose-soft:   #351F2A;
+    --good:        #6FCFA1;
+    --good-soft:   #17301F;
+    --shadow:      0 1px 2px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.45);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ground:      #15111B;
+  --surface:     #1D1726;
+  --surface-2:   #241D2F;
+  --ink:         #F0E9F3;
+  --ink-2:       #C9BCD2;
+  --muted:       #9C8DA8;
+  --line:        #342B41;
+  --line-2:      #453A54;
+  --accent:      #B689EC;
+  --accent-ink:  #C9A5F5;
+  --accent-soft: #2C2139;
+  --rose:        #E88BB0;
+  --rose-soft:   #351F2A;
+  --good:        #6FCFA1;
+  --good-soft:   #17301F;
+  --shadow:      0 1px 2px rgba(0,0,0,.4), 0 14px 36px rgba(0,0,0,.45);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--ground);
+  color: var(--ink);
+  font-family: "IBM Plex Sans KR", system-ui, -apple-system, "Malgun Gothic", sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+.deck {
+  height: 100dvh;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  .deck { scroll-behavior: auto; }
+}
+
+.stage {
+  min-height: 100dvh;
+  scroll-snap-align: center;
+  display: grid;
+  place-items: center;
+  padding: 3vh 2vw 9vh;
+}
+
+/* 슬라이드는 16:9 고정. 컨테이너 쿼리 단위(cqw)로 글자를 재서
+   화면 크기가 달라져도 슬라이드 안의 비율이 그대로 유지된다.  */
+.slide {
+  container-type: inline-size;
+  --w: min(1180px, 95vw);
+  width: var(--w);
+  /* 16:9 를 고정 높이가 아니라 **최소** 높이로 둔다. 고정하면 내용이 많은
+     장에서 글이 잘리는데, 잘린 글은 발표 중에 알아차릴 수도 없다.       */
+  min-height: calc(var(--w) * 9 / 16);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  box-shadow: var(--shadow);
+  padding: 3.4cqw 4cqw;
+  display: flex;
+  flex-direction: column;
+  gap: 2cqw;
+  position: relative;
+}
+/* 그림 칸은 자기 안에서 줄어들 수 있어야 한다. flex 자식은 기본이
+   min-height:auto 라, 이걸 풀지 않으면 이미지가 칸을 밀어낸다. */
+.cols > * { min-width: 0; }
+
+/* 표지만 색을 뒤집는다. 한 번만 쓰는 강조다. */
+.slide.cover {
+  background: linear-gradient(147deg, #2B1B3E 0%, #43265F 58%, #5A2E62 100%);
+  border-color: transparent;
+  color: #F4EDF7;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2cqw;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 1.2cqw;
+}
+.slide.cover .head { border-bottom-color: rgba(244,237,247,.22); }
+
+.eyebrow {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 1.05cqw;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.slide.cover .eyebrow { color: #D9BCF0; }
+
+.num {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 1.05cqw;
+  font-weight: 500;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.slide.cover .num { color: rgba(244,237,247,.6); }
+
+h2 {
+  margin: 0;
+  font-size: 3.05cqw;
+  font-weight: 600;
+  letter-spacing: -.022em;
+  line-height: 1.16;
+  text-wrap: balance;
+}
+
+.lede {
+  margin: 0;
+  font-size: 1.62cqw;
+  line-height: 1.55;
+  color: var(--ink-2);
+  max-width: 62ch;
+  font-weight: 300;
+}
+.slide.cover .lede { color: rgba(244,237,247,.86); }
+
+.body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 1.6cqw; }
+
+.cols {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  gap: 2.4cqw;
+  align-items: start;
+}
+.cols.c-7-5   { grid-template-columns: 7fr 5fr; }
+.cols.c-5-7   { grid-template-columns: 5fr 7fr; }
+.cols.c-1-1   { grid-template-columns: 1fr 1fr; }
+.cols.c-6-6   { grid-template-columns: 1fr 1fr; }
+
+p  { margin: 0; font-size: 1.42cqw; line-height: 1.6; color: var(--ink-2); }
+strong { font-weight: 600; color: var(--ink); }
+.slide.cover strong { color: #FFFFFF; }
+
+ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 1.05cqw; }
+li {
+  font-size: 1.42cqw;
+  line-height: 1.52;
+  color: var(--ink-2);
+  padding-left: 1.9cqw;
+  position: relative;
+}
+li::before {
+  content: "";
+  position: absolute;
+  left: .35cqw;
+  top: .72cqw;
+  width: .52cqw;
+  height: .52cqw;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* ── 수치 타일 ── 페이지의 요점이 숫자일 때만 쓴다 ── */
+.figs { display: grid; grid-auto-flow: column; gap: 1.4cqw; }
+.fig {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  padding: 1.3cqw 1.5cqw;
+  display: flex;
+  flex-direction: column;
+  gap: .35cqw;
+}
+.fig.hero { background: var(--accent-soft); border-color: var(--accent); }
+.fig .k {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: .98cqw;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.fig .v {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 2.7cqw;
+  font-weight: 600;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  line-height: 1;
+}
+.fig.hero .v { color: var(--accent-ink); }
+.fig .sub { font-size: 1.02cqw; color: var(--muted); line-height: 1.35; }
+
+/* ── 표 ── */
+.tbl { width: 100%; border-collapse: collapse; font-size: 1.2cqw; }
+.tbl th {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: .95cqw;
+  font-weight: 500;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-align: left;
+  padding: 0 .8cqw .7cqw 0;
+  border-bottom: 1px solid var(--line-2);
+  white-space: nowrap;
+}
+.tbl td {
+  padding: .72cqw .8cqw .72cqw 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-2);
+  vertical-align: baseline;
+}
+.tbl td.n, .tbl th.n {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.tbl tr:last-child td { border-bottom: none; }
+.tbl td.name { color: var(--ink); font-weight: 500; }
+
+.pass {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: .95cqw;
+  font-weight: 600;
+  color: var(--good);
+  background: var(--good-soft);
+  padding: .18cqw .55cqw;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+/* ── 주석 상자 ── 슬라이드마다 하나만 ── */
+.note {
+  border-left: 2px solid var(--rose);
+  background: var(--rose-soft);
+  padding: 1.1cqw 1.4cqw;
+  border-radius: 0 2px 2px 0;
+  font-size: 1.22cqw;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.note b { color: var(--ink); font-weight: 600; }
+
+.note.calm { border-left-color: var(--accent); background: var(--accent-soft); }
+
+figure { margin: 0; display: flex; flex-direction: column; gap: .7cqw; min-width: 0; }
+/* 높이를 flex 로 채우게 두면, 슬라이드가 내용에 맞춰 커질 수 있게 된 뒤로는
+   그림이 0 에 가깝게 눌린다. 원래 비율대로 두고 위쪽만 막는다. */
+figure img {
+  width: 100%;
+  height: auto;
+  max-height: 42cqw;
+  object-fit: contain;
+  object-position: center;
+  background: #FFFFFF;
+  border: 1px solid var(--line);
+  border-radius: 2px;
+}
+figcaption {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: .95cqw;
+  color: var(--muted);
+  letter-spacing: .02em;
+  line-height: 1.4;
+}
+
+.mono { font-family: "IBM Plex Mono", ui-monospace, monospace; font-variant-numeric: tabular-nums; }
+
+/* ── 표지 ── */
+.cover-body { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 1.6cqw; }
+.cover h1 {
+  margin: 0;
+  font-size: 4.5cqw;
+  font-weight: 600;
+  letter-spacing: -.03em;
+  line-height: 1.1;
+  text-wrap: balance;
+  color: #FFFFFF;
+}
+.cover .rule { width: 8cqw; height: 2px; background: #C79BEA; }
+.cover-meta {
+  display: flex;
+  gap: 2.4cqw;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 1.05cqw;
+  color: rgba(244,237,247,.72);
+  border-top: 1px solid rgba(244,237,247,.2);
+  padding-top: 1.2cqw;
+  flex-wrap: wrap;
+}
+.warn-badge {
+  align-self: flex-start;
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 1cqw;
+  letter-spacing: .06em;
+  color: #FFD9E4;
+  border: 1px solid rgba(255,217,228,.45);
+  padding: .45cqw .9cqw;
+  border-radius: 2px;
+}
+
+/* ── 하단 레일 ── */
+.rail {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  padding: .7rem 1rem;
+  background: color-mix(in srgb, var(--ground) 88%, transparent);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--line);
+  z-index: 10;
+}
+.dots { display: flex; gap: .38rem; }
+.dot {
+  width: .5rem; height: .5rem;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  background: var(--line-2);
+  cursor: pointer;
+  transition: background .18s, transform .18s;
+}
+.dot[aria-current="true"] { background: var(--accent); transform: scale(1.35); }
+.dot:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.rail .count {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: .78rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 3.4rem;
+}
+.rail .hint {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: .72rem;
+  color: var(--muted);
+  letter-spacing: .04em;
+}
+@media (max-width: 640px) { .rail .hint { display: none; } }
+
+/* ── 인쇄: 슬라이드 한 장이 한 페이지 ── */
+@media print {
+  .rail { display: none; }
+  .deck { height: auto; overflow: visible; }
+  .stage { min-height: 0; padding: 0; break-after: page; }
+  .slide { box-shadow: none; width: 100%; border-radius: 0; }
+  body { background: #FFFFFF; }
+}
+</style>
+
+<div class="deck" id="deck">
+
+  <!-- 표지 -->
+  <section class="stage"><article class="slide cover">
+    <div class="head">
+      <span class="eyebrow">2주 개인 프로젝트 · 2026.09</span>
+      <span class="num">BloodMNIST</span>
+    </div>
+    <div class="cover-body">
+      <h1>백혈구 8종 분류,<br>그리고 남은 2%의 정체</h1>
+      <div class="rule"></div>
+      <p class="lede">정확도 <strong>98%</strong>를 넘긴 뒤에 물었다 — 남은 2%는 왜 남았는가.
+        모델을 네 개 만들어 보니, <strong>같은 27장</strong>을 확신에 차서 틀리고 있었다.</p>
+      <span class="warn-badge">교육 목적 · 임상 진단에 사용할 수 없음</span>
+    </div>
+    <div class="cover-meta">
+      <span>17,092장 · 8클래스</span>
+      <span>ResNet18 / EfficientNet-B0</span>
+      <span>GTX 1050 Ti · 4GB</span>
+    </div>
+  </article></section>
+
+  <!-- 1 문제 정의 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">문제 정의</span><span class="num">01</span></div>
+    <div class="body">
+      <h2>혈액 도말 판독은 사람이 눈으로 세는 작업이다</h2>
+      <div class="cols c-7-5">
+        <div class="body">
+          <p class="lede">현미경으로 백혈구를 하나씩 보며 8종으로 분류한다. 숙련이 필요하고, 오래 걸리고,
+            <strong>판독자마다 갈리는 경계</strong>가 있다.</p>
+          <ul>
+            <li>분류 정확도만 높이는 프로젝트는 "숫자 하나"로 끝난다</li>
+            <li>의료 AI 에서 정작 중요한 질문은 <strong>모델이 틀렸을 때 왜 틀렸는가</strong>다</li>
+            <li>그래서 분류에 <strong>설명가능성(Grad-CAM)</strong>과 오류 분석을 붙였다</li>
+          </ul>
+        </div>
+        <div class="note calm">
+          <b>8클래스를 고른 이유.</b> 2진분류였다면 "정확도 95%" 한 줄로 끝났을 것이다.
+          8클래스라야 혼동행렬이 의미를 갖고, 어떤 세포끼리 헷갈리는지 물을 수 있다.
+        </div>
+      </div>
+    </div>
+  </article></section>
+
+  <!-- 2 성공 기준 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">목표와 성공 기준</span><span class="num">02</span></div>
+    <div class="body">
+      <h2>기준을 먼저 정하고, 한 번 올렸다</h2>
+      <div class="cols c-7-5">
+        <table class="tbl">
+          <thead><tr><th>#</th><th>기준</th><th class="n">결과</th><th>판정</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">S1</td><td class="name">test macro F1 ≥ 0.96</td><td class="n">0.9791</td><td><span class="pass">통과</span></td></tr>
+            <tr><td class="mono">S2</td><td class="name">최저 클래스 F1 ≥ 0.90</td><td class="n">0.9540</td><td><span class="pass">통과</span></td></tr>
+            <tr><td class="mono">S3</td><td class="name">같은 시드 재현 차이 &lt; 0.01</td><td class="n">0.0000000</td><td><span class="pass">통과</span></td></tr>
+            <tr><td class="mono">S4</td><td class="name">8클래스 Grad-CAM</td><td class="n">생성</td><td><span class="pass">통과</span></td></tr>
+            <tr><td class="mono">S5</td><td class="name">혼동 상위 3쌍 원인 서술</td><td class="n">4~9장</td><td><span class="pass">통과</span></td></tr>
+            <tr><td class="mono">S6</td><td class="name">1회 학습 30분 이내</td><td class="n">11.9분</td><td><span class="pass">통과</span></td></tr>
+          </tbody>
+        </table>
+        <div class="body">
+          <div class="note">
+            <b>정확도가 아니라 macro F1 을 쓴다.</b> 클래스가 2.7배 불균형이라, 다수 클래스만 맞혀도
+            정확도는 높게 나온다. 실제로 학습 도중(에폭 6)에 accuracy 0.9398 / macro F1 0.9329 로
+            벌어졌다. 성능이 낮을수록 두 지표가 벌어지므로 기준은 macro F1 이 맞다.
+          </div>
+          <p>기준을 <strong>0.90 → 0.96 으로 올렸다.</strong> 3에폭짜리 검증 학습에서 이미 0.9601 이
+            나왔기 때문이다. 넘기 쉬운 기준을 두고 "달성했다"고 쓰는 것은 의미가 없다.</p>
+        </div>
+      </div>
+    </div>
+  </article></section>
+
+  <!-- 3 데이터 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">데이터</span><span class="num">03</span></div>
+    <div class="body">
+      <h2>BloodMNIST — 17,092장, 8클래스, 28px</h2>
+      <div class="cols c-5-7">
+        <div class="body">
+          <div class="figs" style="grid-auto-flow: row;">
+            <div class="fig">
+              <span class="k">분할</span>
+              <span class="v" style="font-size:1.55cqw; line-height:1.5;">train 11,959<br>val 1,712 · test 3,421</span>
+            </div>
+            <div class="fig">
+              <span class="k">클래스 불균형</span>
+              <span class="v">2.7배</span>
+              <span class="sub">최다 neutrophil 666 · 최소 lymphocyte 243 (test)</span>
+            </div>
+          </div>
+          <div class="note calm">
+            <b>증강은 도메인에 맞게 골랐다.</b> 현미경 이미지는 방향성이 없어 회전·뒤집기가 안전하다.
+            반면 <b>색상 변형은 약하게만</b> 준다 — 염색 색상이 세포 종류를 구분하는 실제 단서이기 때문이다.
+          </div>
+        </div>
+        <figure>
+          <img src="{{IMG_SAMPLES}}" alt="8개 클래스의 샘플 이미지 격자">
+          <figcaption>클래스별 샘플 · 라벨이 맞게 붙어 있는지 학습 전에 눈으로 확인했다</figcaption>
+        </figure>
+      </div>
+    </div>
+  </article></section>
+
+  <!-- 4 접근 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">접근</span><span class="num">04</span></div>
+    <div class="body">
+      <h2>전이학습, 그리고 추측 대신 측정</h2>
+      <div class="cols c-1-1">
+        <div class="body">
+          <ul>
+            <li>ImageNet 사전학습 <strong>ResNet18</strong> 의 마지막 층만 8클래스로 교체</li>
+            <li>모델을 직접 설계하지 않았다 — 2주에 할 일이 아니고, 얻을 것도 없다</li>
+            <li>28px 원본을 <strong>112px</strong> 로 늘려 입력</li>
+            <li>AdamW · lr 1e-3 · cosine · 배치 32 · 20에폭</li>
+          </ul>
+        </div>
+        <div class="body">
+          <div class="note">
+            <b>학습이 33분이라 병목을 찾았다.</b> CPU 전처리라고 <b>추측하고</b>
+            <span class="mono">--num-workers</span> 를 올렸더니 <b>오히려 느려졌다.</b>
+            추측이 틀렸다는 뜻이라 도구를 만들어 쟀다.
+          </div>
+          <div class="figs">
+            <div class="fig"><span class="k">GPU 학습</span><span class="v">85초</span><span class="sub">에폭당 · 병목</span></div>
+            <div class="fig"><span class="k">데이터 로딩</span><span class="v">20초</span><span class="sub">에폭당</span></div>
+            <div class="fig hero"><span class="k">224 → 112px</span><span class="v">2.8배</span><span class="sub">33.4분 → 11.9분</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article></section>
+
+  <!-- 5 결과 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">결과</span><span class="num">05</span></div>
+    <div class="body">
+      <h2>EfficientNet-B0 · test macro F1 0.9791</h2>
+      <div class="cols c-5-7">
+        <div class="body">
+          <div class="figs">
+            <div class="fig hero"><span class="k">macro F1</span><span class="v">0.9791</span></div>
+            <div class="fig"><span class="k">accuracy</span><span class="v">0.9801</span></div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>클래스</th><th class="n">F1</th><th class="n">장수</th></tr></thead>
+            <tbody>
+              <tr><td class="name">platelet</td><td class="n">1.0000</td><td class="n">470</td></tr>
+              <tr><td class="name">eosinophil</td><td class="n">0.9952</td><td class="n">624</td></tr>
+              <tr><td class="name">erythroblast</td><td class="n">0.9887</td><td class="n">311</td></tr>
+              <tr><td class="name">neutrophil</td><td class="n">0.9819</td><td class="n">666</td></tr>
+              <tr><td class="name">basophil</td><td class="n">0.9795</td><td class="n">244</td></tr>
+              <tr><td class="name">lymphocyte</td><td class="n">0.9754</td><td class="n">243</td></tr>
+              <tr><td class="name">monocyte</td><td class="n">0.9580</td><td class="n">284</td></tr>
+              <tr><td class="name">immature granulocytes</td><td class="n">0.9540</td><td class="n">579</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <figure>
+          <img src="{{IMG_CONFUSION}}" alt="8x8 혼동행렬 히트맵">
+          <figcaption>혼동행렬 (행 정규화) · 대각선을 벗어난 값이 거의 한 곳에만 몰려 있다</figcaption>
+        </figure>
+      </div>
+    </div>
+  </article></section>
+
+  <!-- 6 설명가능성 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">설명가능성</span><span class="num">06</span></div>
+    <div class="body">
+      <h2>모델은 어디를 보고 판단하는가</h2>
+      <div class="cols c-7-5">
+        <figure>
+          <img src="{{IMG_GRADCAM}}" alt="클래스별 Grad-CAM 히트맵">
+          <figcaption>각 쌍은 (원본, 히트맵) · 마지막 conv 층의 활성화와 기울기로 만든다</figcaption>
+        </figure>
+        <div class="body">
+          <p class="lede">최종 모델은 <strong>틀린 경우에도 거의 전부 세포(주로 핵)</strong>에 히트맵이 모인다.
+            배경이나 이미지 가장자리를 보고 판단한 사례는 찾기 어렵다.</p>
+          <div class="note">
+            <b>에폭 3 짜리 모델은 달랐다.</b> <span class="mono">erythroblast → platelet</span> 오분류에서
+            히트맵이 세포를 벗어나 배경과 오른쪽 가장자리로 번져 있었다. 학습이 진행되면서 모델은
+            <b>"어디를 봐야 하는지"를 먼저 배웠다.</b>
+          </div>
+          <p>남은 오분류가 <strong>엉뚱한 단서 때문이 아니라는 근거</strong>다. 그렇다면 무엇 때문인가 —
+            다음 장부터가 이 프로젝트의 본론이다.</p>
+        </div>
+      </div>
+    </div>
+  </article></section>
+
+  <!-- 7 오류 분석 1 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">오류 분석 ① 어디서 틀리는가</span><span class="num">07</span></div>
+    <div class="body">
+      <h2>오류가 한 클래스로 몰려 있다</h2>
+      <div class="cols c-6-6">
+        <div class="body">
+          <div class="figs">
+            <div class="fig"><span class="k">전체 오분류</span><span class="v">83장</span><span class="sub">test 3,421장 중 2.4%</span></div>
+            <div class="fig hero"><span class="k">IG 가 낀 오류</span><span class="v">83%</span><span class="sub">69장 / 83장</span></div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>정답 → 예측</th><th class="n">장수</th></tr></thead>
+            <tbody>
+              <tr><td class="name">neutrophil → immature granulocytes</td><td class="n">14</td></tr>
+              <tr><td class="name">immature granulocytes → monocyte</td><td class="n">14</td></tr>
+              <tr><td class="name">immature granulocytes → neutrophil</td><td class="n">11</td></tr>
+              <tr><td class="name">monocyte → immature granulocytes</td><td class="n">10</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="body">
+          <div class="note calm">
+            <b>맞힌 3,300장으로 확인했다.</b> 오분류 수십 장으로는 표본이 모자라, 맞힌 장의
+            <b>2순위에 실린 확률</b>을 비교했다. IG 쪽 클래스는 2순위에 약 <b>3배</b>의 확률을 싣는다 —
+            이웃 클래스가 실질적으로 경쟁하고 있다는 뜻이다.
+          </div>
+          <div class="figs">
+            <div class="fig"><span class="k">IG 쪽 2순위 확률</span><span class="v">0.016</span></div>
+            <div class="fig"><span class="k">그 밖</span><span class="v">0.006</span></div>
+          </div>
+          <p><span class="mono">차이 +0.011 · 95% 구간 +0.007~+0.014</span> — 서로 다른 세 모델에서
+            거의 같은 값으로 재현된다.</p>
+        </div>
+      </div>
+    </div>
+  </article></section>
+
+  <!-- 8 오류 분석 2 : 핵심 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">오류 분석 ② 핵심 발견</span><span class="num">08</span></div>
+    <div class="body">
+      <h2>네 모델이 <em style="font-style:normal;color:var(--accent-ink)">같은 27장</em>을 틀린다</h2>
+      <p class="lede">모델마다 다른 장을 틀린다면 원인은 학습의 우연이다. <strong>같은 장</strong>을 틀린다면
+        원인은 그 이미지에 있다.</p>
+      <div class="cols c-6-6">
+        <div class="body">
+          <div class="figs">
+            <div class="fig hero"><span class="k">네 모델 공통 오분류</span><span class="v">27장</span></div>
+            <div class="fig"><span class="k">우연이라면</span><span class="v">0.00장</span><span class="sub">34,202배</span></div>
+          </div>
+          <table class="tbl">
+            <thead><tr><th>모델</th><th>구조</th><th class="n">입력</th><th class="n">시드</th></tr></thead>
+            <tbody>
+              <tr><td class="name">effb0_112</td><td>EfficientNet-B0</td><td class="n">112</td><td class="n">42</td></tr>
+              <tr><td class="name">res112_resnet18</td><td>ResNet18</td><td class="n">112</td><td class="n">42</td></tr>
+              <tr><td class="name">res112_seed43</td><td>ResNet18</td><td class="n">112</td><td class="n">43</td></tr>
+              <tr><td class="name">baseline_224</td><td>ResNet18</td><td class="n">224</td><td class="n">42</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="body">
+          <table class="tbl">
+            <thead><tr><th>겹치는 두 모델</th><th class="n">실제</th><th class="n">우연</th></tr></thead>
+            <tbody>
+              <tr><td class="name">EffNet ∩ ResNet18 (112px)</td><td class="n">39</td><td class="n">1.6</td></tr>
+              <tr><td class="name">EffNet ∩ ResNet18 (224px)</td><td class="n">36</td><td class="n">1.4</td></tr>
+              <tr><td class="name">같은 클래스로 틀린 장</td><td class="n">26</td><td class="n">—</td></tr>
+              <tr><td class="name">넷 다 90% 이상 확신</td><td class="n">15</td><td class="n">—</td></tr>
+            </tbody>
+          </table>
+          <div class="note">
+            <b>시드도, 해상도도, 구조도 원인이 아니다.</b> 남은 공통점은 ImageNet 사전학습과
+            같은 학습 데이터인데, 후자는 배제할 대상이 아니라 <b>바로 그것이 결론</b>이다 —
+            학습 데이터에서 배운 기준과 이 27장의 라벨이 어긋난다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </article></section>
+
+  <!-- 9 오류 분석 3 : 눈으로 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">오류 분석 ③ 눈으로 본 것</span><span class="num">09</span></div>
+    <div class="body">
+      <h2>핵이 분엽되었는가</h2>
+      <div class="cols c-7-5">
+        <figure>
+          <img src="{{IMG_ERRORS}}" alt="neutrophil을 immature granulocytes로 틀린 사례를 두 클래스의 대표 이미지와 비교한 격자">
+          <figcaption>왼쪽부터 틀린 이미지 · 히트맵 │ 정답(호중구) 대표 │ 예측(미성숙 과립구) 대표</figcaption>
+        </figure>
+        <div class="body">
+          <ul>
+            <li><strong>호중구</strong> — 핵이 여러 조각으로 나뉘어 있다 <span class="mono">(분엽)</span></li>
+            <li><strong>미성숙 과립구</strong> — 핵이 통으로 둥글거나 띠 모양 <span class="mono">(미분엽)</span></li>
+            <li><strong>틀린 8장 — 전부 미분엽이다</strong></li>
+          </ul>
+          <p>성숙한 호중구는 핵이 분엽되고, 미성숙 단계에서는 분엽되지 않는다. 즉 이 이미지들은
+            <strong>"neutrophil" 라벨이 붙어 있지만 미성숙 단계의 모습</strong>을 하고 있다.
+            모델이 확률 1.00 으로 반대쪽을 고른 이유가 눈으로 설명된다.</p>
+          <div class="note">
+            <b>의학적 판정은 아니다.</b> 28px 저해상도이고 발표자는 혈액학 전문가가 아니다.
+            여기서 말할 수 있는 것은 <b>"모델의 판단을 사람 눈으로도 따라갈 수 있다"</b>까지다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </article></section>
+
+  <!-- 10 한계 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">한계</span><span class="num">10</span></div>
+    <div class="body">
+      <h2>말할 수 없는 것을 먼저 적는다</h2>
+      <div class="cols c-1-1">
+        <ul>
+          <li><strong>임상 사용 불가.</strong> 임상 검증을 거치지 않았고, 그럴 목적으로 만들지 않았다</li>
+          <li><strong>28px 저해상도.</strong> 원본의 224px 버전을 확보하지 못했다</li>
+          <li><strong>단일 데이터셋.</strong> 다른 병원·장비·염색 조건은 보장할 수 없다</li>
+        </ul>
+        <ul>
+          <li><strong>확신도 비교 3건은 판정보류.</strong> 오분류가 70~83장뿐이라 95% 구간이 0 을 걸친다.
+            "차이가 없다"가 아니라 <strong>"이 표본으로는 말할 수 없다"</strong>이다</li>
+          <li><strong>ImageNet 사전학습은 공유한다.</strong> 네 모델의 마지막 공통점이라 완전히 배제하지 못했다</li>
+          <li><strong>라벨 오류인지는 미확정.</strong> 전문가 검토가 필요하다</li>
+        </ul>
+      </div>
+    </div>
+  </article></section>
+
+  <!-- 11 배운 것 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">배운 것</span><span class="num">11</span></div>
+    <div class="body">
+      <h2>세 번 틀렸고, 세 번 다 측정해서 잡았다</h2>
+      <div class="cols c-1-1">
+        <div class="body">
+          <div class="note">
+            <b>① 병목을 추측했다.</b> CPU 전처리라 믿고 워커를 늘렸더니 더 느려졌다.
+            재 보니 GPU 가 병목이었다 <span class="mono">(85초 vs 20초)</span>.
+          </div>
+          <div class="note">
+            <b>② 판정을 부등호로 했다.</b> 40장짜리 두 평균을 부등호로 비교했더니, 같은 데이터로 학습한
+            두 모델이 <b>정반대 판정</b>을 냈다. 부트스트랩 신뢰구간으로 바꾸자 세 모델이 일관되게
+            "판정보류"로 모였다.
+          </div>
+          <div class="note">
+            <b>③ 항상 통과하는 검사를 만들었다.</b> "2순위가 이웃 클래스인가"를 우연(1/7)과 비교했더니
+            <b>여덟 클래스가 전부 통과</b>했다. platelet 은 2순위가 96% 확률로 erythroblast 인데
+            한 장도 안 틀린다. 기준을 "2순위에 <b>실린 확률</b>"로 바꿨다.
+          </div>
+        </div>
+        <div class="body">
+          <p class="lede">셋의 원인은 같다. <strong>추측을 결과로 적으면 안 되고, 항상 통과하거나
+            표본에 따라 뒤집히는 검사는 검사가 아니다.</strong></p>
+          <div class="note calm">
+            <b>그래서 정확도를 더 올리지 않았다.</b> 남은 오분류는 학습의 우연이 아니라 데이터의
+            성질이다. macro F1 을 더 올리는 것은 이 경계를 맞히는 일이고, 그것은 모델을 개선하는
+            것이 아니라 <b>데이터의 라벨링 관습을 외우는 것</b>에 가깝다.
+          </div>
+          <p class="mono" style="font-size:1.15cqw;color:var(--muted);">
+            커밋 8 · 테스트 53 · 실행 7 · 성공 기준 6/6</p>
+        </div>
+      </div>
+    </div>
+  </article></section>
+
+</div>
+
+<nav class="rail" aria-label="슬라이드 이동">
+  <span class="count" id="count">01 / 12</span>
+  <div class="dots" id="dots"></div>
+  <span class="hint">← → 또는 스크롤</span>
+</nav>
+
+<script>
+(function () {
+  var deck = document.getElementById('deck');
+  var slides = Array.prototype.slice.call(deck.querySelectorAll('.stage'));
+  var dots = document.getElementById('dots');
+  var count = document.getElementById('count');
+  var current = 0;
+
+  var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+
+  slides.forEach(function (_, i) {
+    var b = document.createElement('button');
+    b.className = 'dot';
+    b.type = 'button';
+    b.setAttribute('aria-label', (i + 1) + '번 슬라이드');
+    b.addEventListener('click', function () { go(i); });
+    dots.appendChild(b);
+  });
+  var dotEls = Array.prototype.slice.call(dots.children);
+
+  function mark(i) {
+    if (i === current) return;
+    current = i;
+    dotEls.forEach(function (d, k) {
+      if (k === i) { d.setAttribute('aria-current', 'true'); }
+      else { d.removeAttribute('aria-current'); }
+    });
+    count.textContent = pad(i + 1) + ' / ' + pad(slides.length);
+  }
+
+  function go(i) {
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    slides[i].scrollIntoView({ block: 'start' });
+    mark(i);
+  }
+
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) mark(slides.indexOf(e.target));
+      });
+    }, { root: deck, threshold: 0.55 });
+    slides.forEach(function (s) { io.observe(s); });
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') {
+      e.preventDefault(); go(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault(); go(current - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault(); go(0);
+    } else if (e.key === 'End') {
+      e.preventDefault(); go(slides.length - 1);
+    }
+  });
+
+  dotEls[0].setAttribute('aria-current', 'true');
+  count.textContent = '01 / ' + pad(slides.length);
+})();
+</script>
