@@ -34,8 +34,9 @@ from src.data import (  # noqa: E402
     denormalize,
     load_split,
 )
+from src.cli import guard, load_run, pick_device  # noqa: E402
 from src.gradcam import GradCAM, overlay  # noqa: E402
-from src.model import build_model, target_layer  # noqa: E402
+from src.model import target_layer  # noqa: E402
 from src.plots import short_names, use_korean_font  # noqa: E402
 
 use_korean_font()
@@ -53,16 +54,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def load_checkpoint(run_dir: Path, device):
-    ckpt_path = run_dir / "best.pt"
-    if not ckpt_path.exists():
-        raise FileNotFoundError(
-            f"{ckpt_path} 가 없습니다. train.py 를 먼저 실행하세요."
-        )
-    ckpt = torch.load(ckpt_path, map_location=device)
-    model = build_model(ckpt["arch"], NUM_CLASSES, pretrained=False).to(device)
-    model.load_state_dict(ckpt["model"])
-    model.eval()
-    return model, ckpt
+    """`src.cli.load_run` 으로 옮겼다. 예전 호출부를 위해 남겨 둔다."""
+    return load_run(run_dir.name, ROOT, device)
 
 
 def class_gallery(model, layer, dataset, device, out: Path, per_class: int) -> None:
@@ -161,12 +154,9 @@ def _save(fig, path: Path) -> None:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     run_dir = ROOT / "runs" / args.run
-    if not run_dir.exists():
-        print(f"{run_dir} 가 없습니다.")
-        return 1
 
-    device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
-    model, ckpt = load_checkpoint(run_dir, device)
+    device = pick_device(args.cpu)
+    model, ckpt = load_run(args.run, ROOT, device)
     layer = target_layer(model, ckpt["arch"])
 
     imgs, lbls = load_split(args.data_root, args.size, args.split)
@@ -182,4 +172,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(guard(main))

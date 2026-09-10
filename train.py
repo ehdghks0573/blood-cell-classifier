@@ -23,6 +23,7 @@ import torch.nn as nn
 
 from src import metrics as M
 from src import plots
+from src.cli import describe_device, guard, pick_device, positive_int
 from src.data import CLASS_NAMES, NUM_CLASSES, available_sizes, build_loaders
 from src.engine import class_weights, predict, train_one_epoch
 from src.model import ARCHS, build_model, count_parameters
@@ -39,8 +40,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--input-size", type=int, default=224,
                    help="모델에 넣을 크기. 사전학습 모델 기준이라 224 가 기본")
     p.add_argument("--arch", default="resnet18", choices=list(ARCHS))
-    p.add_argument("--epochs", type=int, default=20)
-    p.add_argument("--batch-size", type=int, default=32)
+    p.add_argument("--epochs", type=positive_int, default=20)
+    p.add_argument("--batch-size", type=positive_int, default=32)
     p.add_argument("--lr", type=float, default=1e-3)
     p.add_argument("--weight-decay", type=float, default=1e-4)
     p.add_argument("--num-workers", type=int, default=2)
@@ -49,7 +50,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                    help="클래스 불균형을 손실 가중치로 보정한다")
     p.add_argument("--no-pretrained", action="store_true",
                    help="사전학습 가중치 없이 밑바닥부터 학습 (비교 실험용)")
-    p.add_argument("--patience", type=int, default=7,
+    p.add_argument("--patience", type=positive_int, default=7,
                    help="검증 macro F1 이 이만큼 개선 없으면 조기 종료")
     p.add_argument("--name", help="실행 이름. 없으면 시각으로 자동 생성")
     p.add_argument("--cpu", action="store_true", help="GPU 가 있어도 CPU 로 학습")
@@ -65,7 +66,8 @@ def main(argv: list[str] | None = None) -> int:
         print(f"tools/fetch_data.py 를 실행하거나 npz 를 {args.data_root} 에 넣으세요.")
         return 1
 
-    device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
+    device = pick_device(args.cpu)
+    print(f"장치     : {describe_device(device)}")
     seed_everything(args.seed)
 
     name = args.name or f"{args.arch}_{args.size}px_{datetime.now():%m%d_%H%M%S}"
@@ -181,4 +183,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(guard(main))

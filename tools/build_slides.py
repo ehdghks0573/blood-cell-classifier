@@ -1,4 +1,4 @@
-"""발표 슬라이드를 한 파일로 묶는다 (Day 14).
+﻿"""발표 슬라이드를 한 파일로 묶는다 (Day 14).
 
     python tools/build_slides.py
 
@@ -40,8 +40,23 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
                    help="그림을 가져올 실행 이름 (기본: 발표에 쓰는 최고 성능 모델)")
     p.add_argument("--src", default=str(ROOT / "docs" / "slides.src.html"))
     p.add_argument("--out", default=str(ROOT / "docs" / "slides.html"))
+    p.add_argument("--figures", default=str(ROOT / "docs" / "figures"),
+                   help="세포 낱장이 있는 폴더. 점검용으로 돌릴 때 따로 둔다")
     p.add_argument("--quality", type=int, default=88, help="JPEG 품질")
     return p.parse_args(argv)
+
+
+def rel(path: Path) -> str:
+    """보여 주기용 경로. 프로젝트 밖이거나 상대 경로면 그대로 둔다.
+
+    `relative_to` 는 밖에 있는 경로에 대해 예외를 던진다. 출력 경로를
+    상대 경로로 주면 마지막 줄에서 터졌다 — 결과물은 다 만들어 놓고
+    성공 메시지를 찍다가 실패하는, 가장 헷갈리는 종류의 실패였다.
+    """
+    try:
+        return str(path.resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path)
 
 
 def data_uri(path: Path, max_width: int, fmt: str, quality: int) -> tuple[str, int]:
@@ -82,7 +97,7 @@ def main(argv: list[str] | None = None) -> int:
     # 세포 낱장 — docs/figures/<이름>.png 가 {{CELL_<이름>}} 이 된다.
     # 목록을 손으로 관리하면 tools/extract_cells.py 가 새 이미지를 뽑을 때마다
     # 여기도 고쳐야 한다. 폴더를 그대로 읽는다.
-    cells = sorted((ROOT / "docs" / "figures").glob("*.png"))
+    cells = sorted(Path(args.figures).glob("*.png"))
     used = 0
     for path in cells:
         placeholder = "{{CELL_" + path.stem + "}}"
@@ -94,21 +109,21 @@ def main(argv: list[str] | None = None) -> int:
         html = html.replace(placeholder, uri)
         used += 1
     if used:
-        print(f"  세포 낱장 {used}장 (docs/figures/)")
+        print(f"  세포 낱장 {used}장 ({rel(Path(args.figures))})")
 
-    for token, (rel, width, fmt) in FIGURES.items():
-        path = ROOT / rel.format(run=args.run)
+    for token, (template, width, fmt) in FIGURES.items():
+        path = ROOT / template.format(run=args.run)
         placeholder = "{{" + token + "}}"
         if placeholder not in html:
             print(f"경고: {placeholder} 가 원본에 없습니다")
             continue
         if not path.exists():
-            missing.append(str(path.relative_to(ROOT)))
+            missing.append(rel(path))
             continue
 
         uri, kb = data_uri(path, width, fmt, args.quality)
         html = html.replace(placeholder, uri)
-        print(f"  {token:<14s} {path.relative_to(ROOT)}  →  {kb}KB ({fmt})")
+        print(f"  {token:<14s} {rel(path)}  →  {kb}KB ({fmt})")
 
     if missing:
         print("\n그림이 없습니다:")
@@ -120,7 +135,7 @@ def main(argv: list[str] | None = None) -> int:
     out = Path(args.out)
     out.write_text(html, encoding="utf-8")
     size_kb = len(html.encode("utf-8")) // 1024
-    print(f"\n{out.relative_to(ROOT)}  {size_kb:,}KB")
+    print(f"\n{rel(out)}  {size_kb:,}KB")
     if size_kb > 15000:
         print("경고: 16MB 에 가깝습니다. --quality 를 낮추거나 가로 폭을 줄이세요.")
     return 0

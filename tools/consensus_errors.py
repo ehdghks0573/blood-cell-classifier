@@ -33,15 +33,14 @@ import torch
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from src.cli import UserError, guard, load_run, pick_device  # noqa: E402
 from src.data import (  # noqa: E402
     CLASS_NAMES,
-    NUM_CLASSES,
     BloodDataset,
     build_transform,
     load_split,
 )
 from src.engine import predict  # noqa: E402
-from src.model import build_model  # noqa: E402
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -58,11 +57,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def predictions_for(run: str, data_root: str, size: int, split: str, device):
-    run_dir = ROOT / "runs" / run
-    ckpt = torch.load(run_dir / "best.pt", map_location=device, weights_only=False)
-
-    model = build_model(ckpt["arch"], NUM_CLASSES, pretrained=False).to(device)
-    model.load_state_dict(ckpt["model"])
+    model, ckpt = load_run(run, ROOT, device)
 
     imgs, lbls = load_split(data_root, size, split)
     dataset = BloodDataset(imgs, lbls, build_transform(ckpt["input_size"], train=False))
@@ -75,10 +70,10 @@ def predictions_for(run: str, data_root: str, size: int, split: str, device):
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     if len(args.runs) < 2:
-        print("모델이 둘 이상 필요합니다.")
-        return 1
+        raise UserError("모델이 둘 이상 필요합니다. 겹침을 재려면 비교 대상이 있어야 합니다.\n"
+                        "예: python tools/consensus_errors.py --runs effb0_112 res112_resnet18")
 
-    device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
+    device = pick_device(args.cpu)
 
     preds, probs_all, truth = {}, {}, None
     for run in args.runs:
@@ -171,4 +166,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(guard(main))

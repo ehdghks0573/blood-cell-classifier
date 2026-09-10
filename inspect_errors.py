@@ -36,7 +36,7 @@ import matplotlib.pyplot as plt  # noqa: E402
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 
-from explain import load_checkpoint  # noqa: E402
+from src.cli import guard, load_run, pick_device  # noqa: E402
 from src.data import (  # noqa: E402
     CLASS_NAMES,
     CLASS_NAMES_KO,
@@ -174,12 +174,9 @@ def _save(fig, path: Path) -> None:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     run_dir = ROOT / "runs" / args.run
-    if not run_dir.exists():
-        print(f"{run_dir} 가 없습니다.")
-        return 1
 
-    device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
-    model, ckpt = load_checkpoint(run_dir, device)
+    device = pick_device(args.cpu)
+    model, ckpt = load_run(args.run, ROOT, device)
     layer = target_layer(model, ckpt["arch"])
 
     images, lbls = load_split(args.data_root, args.size, args.split)
@@ -255,4 +252,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(guard(main))

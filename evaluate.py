@@ -21,6 +21,7 @@ sys.path.insert(0, str(ROOT))
 
 from src import metrics as M  # noqa: E402
 from src import plots  # noqa: E402
+from src.cli import guard, load_run, pick_device  # noqa: E402
 from src.data import (  # noqa: E402
     CLASS_NAMES,
     CLASS_NAMES_KO,
@@ -30,7 +31,6 @@ from src.data import (  # noqa: E402
     load_split,
 )
 from src.engine import predict  # noqa: E402
-from src.model import build_model  # noqa: E402
 
 # 성공 기준 (docs/PLAN.md 와 일치시킨다)
 S1_MACRO_F1 = 0.96
@@ -53,17 +53,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
     run_dir = ROOT / "runs" / args.run
-    ckpt_path = run_dir / "best.pt"
 
-    if not ckpt_path.exists():
-        print(f"{ckpt_path} 가 없습니다. train.py 를 먼저 실행하세요.")
-        return 1
-
-    device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
-    ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
-
-    model = build_model(ckpt["arch"], NUM_CLASSES, pretrained=False).to(device)
-    model.load_state_dict(ckpt["model"])
+    device = pick_device(args.cpu)
+    model, ckpt = load_run(args.run, ROOT, device)
 
     imgs, lbls = load_split(args.data_root, args.size, args.split)
     dataset = BloodDataset(imgs, lbls, build_transform(ckpt["input_size"], train=False))
@@ -128,4 +120,4 @@ def main(argv: list[str] | None = None) -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(guard(main))
