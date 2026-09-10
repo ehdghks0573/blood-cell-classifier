@@ -95,7 +95,7 @@ VRAM 에 여유가 많아 배치를 키우거나 ResNet50 으로 올릴 수 있�
 시작할 때:
 
 ```powershell
-cd C:\Users\mbc\blood-cell-classifier
+cd <프로젝트 폴더>
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
