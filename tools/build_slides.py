@@ -32,6 +32,7 @@ FIGURES = {
     "IMG_GRADCAM":   ("runs/{run}/gradcam_classes.png",                1150, "JPEG"),
     "IMG_ERRORS":    ("runs/{run}/errors/"
                       "neutrophil__to__immature_granulocytes.png",     1500, "JPEG"),
+    "IMG_CONSENSUS": ("runs/{run}/errors/consensus_all.png",           1500, "JPEG"),
 }
 
 

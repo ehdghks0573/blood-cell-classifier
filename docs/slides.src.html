@@ -312,10 +312,13 @@ figcaption {
   border: 2px solid var(--edge-2);
   image-rendering: pixelated;
 }
-.ccell.focus img { border-color: var(--magenta); box-shadow: 0 0 0 .5cqw rgba(255,122,176,.14); }
+/* 경계에 놓인 사례는 색이 아니라 **테두리 굵기와 흰 링**으로 표시한다.
+   양쪽 구간이 이미 보라와 앰버를 쓰고 있어, 세 번째 색을 더하면
+   색약에서 구분이 무너진다. 굵기는 어떤 시각에서도 보인다. */
+.ccell.focus img { border-color: var(--ink); border-width: 3px; box-shadow: 0 0 0 .45cqw rgba(247,242,250,.16); }
 .ccell .t { font-size: 1.3cqw; font-weight: 600; color: var(--ink); line-height: 1.3; }
 .ccell .d { font-size: 1.08cqw; color: var(--muted); line-height: 1.4; }
-.ccell.focus .d { color: var(--magenta); }
+.ccell.focus .d { color: var(--ink-2); }
 .contin svg { width: 100%; height: auto; display: block; }
 
 /* ── 표지 ── */
@@ -586,9 +589,85 @@ figcaption {
     </div>
   </article></section>
 
+  <!-- 7-2 구조 비교 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">구조 비교</span><span class="num">08</span></div>
+    <div class="body">
+      <h2>더 큰 모델이 <span class="hl">답이 아니었다</span></h2>
+      <div class="cols c-7-5">
+        <figure role="img"
+                aria-label="같은 조건에서 세 구조를 비교한 산점도. EfficientNet-B0 이 가장 좋고 빠른 편이며, 파라미터가 가장 많은 ResNet50 이 가장 나쁘고 10배 느리다.">
+          <svg viewBox="0 0 580 268" xmlns="http://www.w3.org/2000/svg">
+            <line x1="70" y1="212" x2="548" y2="212" stroke="#3D2F53" stroke-width="1"/>
+            <line x1="70" y1="34"  x2="70"  y2="212" stroke="#3D2F53" stroke-width="1"/>
+
+            <text x="62" y="70"  font-size="12" fill="#8C7C9B" text-anchor="end"
+                  font-family="IBM Plex Mono, monospace">0.979</text>
+            <text x="62" y="146" font-size="12" fill="#8C7C9B" text-anchor="end"
+                  font-family="IBM Plex Mono, monospace">0.975</text>
+            <text x="62" y="203" font-size="12" fill="#8C7C9B" text-anchor="end"
+                  font-family="IBM Plex Mono, monospace">0.973</text>
+            <text x="70" y="232" font-size="12" fill="#8C7C9B" text-anchor="middle"
+                  font-family="IBM Plex Mono, monospace">0</text>
+            <text x="235" y="232" font-size="12" fill="#8C7C9B" text-anchor="middle"
+                  font-family="IBM Plex Mono, monospace">30</text>
+            <text x="400" y="232" font-size="12" fill="#8C7C9B" text-anchor="middle"
+                  font-family="IBM Plex Mono, monospace">60</text>
+            <text x="510" y="232" font-size="12" fill="#8C7C9B" text-anchor="middle"
+                  font-family="IBM Plex Mono, monospace">120</text>
+            <text x="309" y="256" font-size="13" fill="#C6B7D4" text-anchor="middle"
+                  font-family="IBM Plex Sans KR, sans-serif">학습 시간 (분)</text>
+            <text x="24" y="126" font-size="13" fill="#C6B7D4" text-anchor="middle"
+                  transform="rotate(-90 24 126)"
+                  font-family="IBM Plex Sans KR, sans-serif">test macro F1</text>
+
+            <text x="88" y="50" font-size="12" fill="#8C7C9B" text-anchor="start"
+                  font-family="IBM Plex Sans KR, sans-serif">← 좋고 빠름</text>
+            <text x="530" y="200" font-size="12" fill="#8C7C9B" text-anchor="end"
+                  font-family="IBM Plex Sans KR, sans-serif">나쁘고 느림 →</text>
+
+            <circle cx="135" cy="146" r="7" fill="#A874F5" stroke="#150F1D" stroke-width="2"/>
+            <text x="150" y="143" font-size="14" fill="#F7F2FA" text-anchor="start"
+                  font-family="IBM Plex Sans KR, sans-serif">ResNet18</text>
+            <text x="150" y="159" font-size="12" fill="#8C7C9B" text-anchor="start"
+                  font-family="IBM Plex Mono, monospace">11.2M · 11.9분 · 0.9749</text>
+
+            <circle cx="197" cy="70" r="7" fill="#A874F5" stroke="#150F1D" stroke-width="2"/>
+            <text x="212" y="67" font-size="14" fill="#F7F2FA" text-anchor="start"
+                  font-weight="600" font-family="IBM Plex Sans KR, sans-serif">EfficientNet-B0</text>
+            <text x="212" y="83" font-size="12" fill="#8C7C9B" text-anchor="start"
+                  font-family="IBM Plex Mono, monospace">4.0M · 23.2분 · 0.9791  ← 최고</text>
+
+            <circle cx="513" cy="192" r="9" fill="#D9A63A" stroke="#150F1D" stroke-width="2"/>
+            <text x="498" y="172" font-size="14" fill="#F7F2FA" text-anchor="end"
+                  font-weight="600" font-family="IBM Plex Sans KR, sans-serif">ResNet50</text>
+            <text x="498" y="188" font-size="12" fill="#D9A63A" text-anchor="end"
+                  font-family="IBM Plex Mono, monospace">23.5M · 120.8분 · 0.9738</text>
+          </svg>
+          <figcaption>같은 조건 (112px · 20에폭 · 시드 42) · 왼쪽 위가 좋다</figcaption>
+        </figure>
+        <div class="body">
+          <p class="lede">파라미터가 <strong>가장 많은</strong> 모델이
+            <strong>가장 나쁘고 10배 느리다.</strong></p>
+          <div class="plain">
+            <span class="tag">왜 그런가</span>
+            <p>원본이 <strong>28 × 28 픽셀</strong>이다. 담긴 정보가 적어서 모델을 키워도
+              더 뽑아낼 것이 없다. 파라미터가 가장 적은 EfficientNet-B0 이 가장 좋은 것이
+              같은 이야기다.</p>
+          </div>
+          <div class="note">
+            <b>이 실험은 성능 때문에 돌린 게 아니다.</b> 뒤에 나올 발견에 남아 있던
+            반론 — <i>구조를 하나만 바꿔 보고 구조와 무관하다고 할 수 있는가</i> —
+            을 닫으려고 돌렸다. 성능이 낮게 나온 것은 덤이다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </article></section>
+
   <!-- 8 Grad-CAM -->
   <section class="stage"><article class="slide">
-    <div class="head"><span class="eyebrow">설명가능성</span><span class="num">08</span></div>
+    <div class="head"><span class="eyebrow">설명가능성</span><span class="num">09</span></div>
     <div class="body">
       <h2>모델이 <span class="hl">어디를 보고</span> 판단했는지 본다</h2>
       <div class="cols c-7-5">
@@ -615,7 +694,7 @@ figcaption {
 
   <!-- 9 전환 -->
   <section class="stage"><article class="slide turn">
-    <div class="head"><span class="eyebrow">여기서부터가 본론</span><span class="num">09</span></div>
+    <div class="head"><span class="eyebrow">여기서부터가 본론</span><span class="num">10</span></div>
     <div class="body" style="justify-content:center;">
       <h2>모델이 세포를 제대로 보는데도<br>틀린다면, <span class="hl">왜 틀리는 걸까</span></h2>
       <p class="lede">남은 83장을 세 가지 방법으로 따라갔다 —
@@ -626,7 +705,7 @@ figcaption {
 
   <!-- 10 오류가 몰려 있다 -->
   <section class="stage"><article class="slide">
-    <div class="head"><span class="eyebrow">오류 분석 ① 어디서 틀리는가</span><span class="num">10</span></div>
+    <div class="head"><span class="eyebrow">오류 분석 ① 어디서 틀리는가</span><span class="num">11</span></div>
     <div class="body">
       <h2>틀린 83장 중 <span class="hl">69장</span>이 한 종류를 낀다</h2>
       <div class="cols c-5-7">
@@ -655,7 +734,7 @@ figcaption {
 
   <!-- 11 연속선 다이어그램 -->
   <section class="stage"><article class="slide">
-    <div class="head"><span class="eyebrow">오류 분석 ② 왜 하필 이 셋인가</span><span class="num">11</span></div>
+    <div class="head"><span class="eyebrow">오류 분석 ② 왜 하필 이 셋인가</span><span class="num">12</span></div>
     <div class="body">
       <h2>이 둘은 <span class="hl">서로 다른 세포가 아니다.</span><br>같은 세포의 어제와 오늘이다</h2>
       <figure class="contin" role="img"
@@ -678,16 +757,18 @@ figcaption {
           </div>
         </div>
 
+        <!-- 두 구간의 색은 보라(#A874F5)와 앰버(#B98426). 색약 검증에서
+             ΔE 28.0 으로 넉넉히 갈린다. 처음에 쓰던 마젠타·민트 조합은
+             적록색약에서 ΔE 4.7 로 거의 같은 색이었다. -->
         <svg viewBox="0 0 960 132" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="mature" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%"  stop-color="#A874F5"/>
-              <stop offset="50%" stop-color="#FF7AB0"/>
-              <stop offset="100%" stop-color="#4FD9A6"/>
+              <stop offset="0%"   stop-color="#A874F5"/>
+              <stop offset="100%" stop-color="#D9A63A"/>
             </linearGradient>
             <marker id="tip" viewBox="0 0 10 10" refX="9" refY="5"
                     markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <polygon points="0,0 10,5 0,10" fill="#4FD9A6"/>
+              <polygon points="0,0 10,5 0,10" fill="#D9A63A"/>
             </marker>
           </defs>
 
@@ -699,19 +780,19 @@ figcaption {
           <text x="920" y="18" font-size="15" font-family="IBM Plex Mono, monospace"
                 fill="#8C7C9B" text-anchor="end">성숙</text>
 
-          <line x1="480" y1="16" x2="480" y2="88" stroke="#FF7AB0"
-                stroke-width="2" stroke-dasharray="5 5"/>
+          <line x1="480" y1="14" x2="480" y2="88" stroke="#F7F2FA"
+                stroke-width="2" stroke-dasharray="6 5"/>
           <text x="480" y="108" font-size="17" font-family="IBM Plex Sans KR, sans-serif"
-                font-weight="600" fill="#FF7AB0" text-anchor="middle">여기서 라벨이 갈린다</text>
+                font-weight="600" fill="#F7F2FA" text-anchor="middle">여기서 라벨이 갈린다</text>
           <text x="480" y="128" font-size="14" font-family="IBM Plex Sans KR, sans-serif"
                 fill="#8C7C9B" text-anchor="middle">어디서 자를지는 판독자의 판단이다</text>
 
-          <rect x="40" y="52" width="430" height="22" rx="3" fill="rgba(168,116,245,.16)"/>
-          <text x="255" y="68" font-size="15" font-family="IBM Plex Sans KR, sans-serif"
+          <rect x="40" y="52" width="428" height="22" rx="3" fill="rgba(168,116,245,.20)"/>
+          <text x="254" y="68" font-size="15" font-family="IBM Plex Sans KR, sans-serif"
                 fill="#C6B7D4" text-anchor="middle">골수구 · 후골수구 · 전골수구</text>
 
-          <rect x="490" y="52" width="430" height="22" rx="3" fill="rgba(79,217,166,.14)"/>
-          <text x="705" y="68" font-size="15" font-family="IBM Plex Sans KR, sans-serif"
+          <rect x="492" y="52" width="428" height="22" rx="3" fill="rgba(217,166,58,.20)"/>
+          <text x="706" y="68" font-size="15" font-family="IBM Plex Sans KR, sans-serif"
                 fill="#C6B7D4" text-anchor="middle">띠 호중구 · 분엽 호중구</text>
         </svg>
         <figcaption>미성숙 과립구가 자라면 호중구가 된다 · 둘은 배타적인 범주가 아니라 <b>한 줄 위의 두 구간</b>이고,
@@ -722,7 +803,7 @@ figcaption {
 
   <!-- 12 핵심: 공통 오분류 -->
   <section class="stage"><article class="slide">
-    <div class="head"><span class="eyebrow">오류 분석 ③ 핵심 발견</span><span class="num">12</span></div>
+    <div class="head"><span class="eyebrow">오류 분석 ③ 핵심 발견</span><span class="num">13</span></div>
     <div class="body">
       <h2>서로 다른 다섯 모델이<br><span class="hl">같은 26장</span>을 틀린다</h2>
       <div class="cols c-5-7">
@@ -747,14 +828,52 @@ figcaption {
               <tr><td class="name">ResNet18</td><td class="n">224px</td><td class="n">42</td><td class="n">70</td></tr>
             </tbody>
           </table>
-          <table class="tbl">
-            <thead><tr><th>모델을 더 넣으면</th><th class="n">공통 오분류</th></tr></thead>
-            <tbody>
-              <tr><td class="name">ResNet18 3개 (시드·해상도만 다름)</td><td class="n">40</td></tr>
-              <tr><td class="name">+ EfficientNet-B0</td><td class="n">27</td></tr>
-              <tr class="mark"><td class="name">+ ResNet50</td><td class="n">26</td></tr>
-            </tbody>
-          </table>
+          <figure role="img"
+                  aria-label="모델을 더할수록 공통 오분류가 40장에서 27장, 26장으로 줄지만 세 번째 구조를 넣어도 한 장밖에 줄지 않고 멈춘다.">
+            <svg viewBox="0 0 560 224" xmlns="http://www.w3.org/2000/svg">
+              <!-- 눈금과 축은 뒤로 물러나 있어야 한다 -->
+              <line x1="64" y1="176" x2="536" y2="176" stroke="#3D2F53" stroke-width="1"/>
+              <line x1="64" y1="36"  x2="64"  y2="176" stroke="#3D2F53" stroke-width="1"/>
+              <text x="56" y="52"  font-size="13" fill="#8C7C9B" text-anchor="end"
+                    font-family="IBM Plex Mono, monospace">40</text>
+              <text x="56" y="181" font-size="13" fill="#8C7C9B" text-anchor="end"
+                    font-family="IBM Plex Mono, monospace">0</text>
+
+              <polyline points="130,48 320,93 500,96" fill="none"
+                        stroke="#A874F5" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+
+              <circle cx="130" cy="48" r="5" fill="#A874F5"/>
+              <circle cx="320" cy="93" r="5" fill="#A874F5"/>
+              <circle cx="500" cy="96" r="6" fill="#A874F5" stroke="#150F1D" stroke-width="2"/>
+
+              <text x="130" y="34" font-size="19" fill="#F7F2FA" text-anchor="middle"
+                    font-weight="600" font-family="IBM Plex Mono, monospace">40</text>
+              <text x="320" y="79" font-size="19" fill="#F7F2FA" text-anchor="middle"
+                    font-weight="600" font-family="IBM Plex Mono, monospace">27</text>
+              <text x="500" y="82" font-size="19" fill="#F7F2FA" text-anchor="middle"
+                    font-weight="600" font-family="IBM Plex Mono, monospace">26</text>
+
+              <text x="130" y="198" font-size="13" fill="#C6B7D4" text-anchor="middle"
+                    font-family="IBM Plex Sans KR, sans-serif">ResNet18 3개</text>
+              <text x="130" y="214" font-size="12" fill="#8C7C9B" text-anchor="middle"
+                    font-family="IBM Plex Sans KR, sans-serif">시드·해상도만 다름</text>
+              <text x="320" y="198" font-size="13" fill="#C6B7D4" text-anchor="middle"
+                    font-family="IBM Plex Sans KR, sans-serif">+ EfficientNet-B0</text>
+              <text x="320" y="214" font-size="12" fill="#8C7C9B" text-anchor="middle"
+                    font-family="IBM Plex Sans KR, sans-serif">두 번째 구조</text>
+              <text x="500" y="198" font-size="13" fill="#F7F2FA" text-anchor="middle"
+                    font-weight="600" font-family="IBM Plex Sans KR, sans-serif">+ ResNet50</text>
+              <text x="500" y="214" font-size="12" fill="#8C7C9B" text-anchor="middle"
+                    font-family="IBM Plex Sans KR, sans-serif">세 번째 구조</text>
+
+              <line x1="64" y1="176" x2="536" y2="176" stroke="#8C7C9B"
+                    stroke-width="1" stroke-dasharray="4 4"/>
+              <text x="536" y="169" font-size="12" fill="#8C7C9B" text-anchor="end"
+                    font-family="IBM Plex Sans KR, sans-serif">우연이라면 0.00장</text>
+            </svg>
+            <figcaption>모델을 더할수록 줄지만, <b>세 번째 구조에서 한 장</b>밖에 안 줄었다</figcaption>
+          </figure>
           <div class="note">
             <b>줄어들다 멈춘다.</b> 세 번째 구조를 넣었는데 27 → 26, 한 장 줄었다.
             겹침이 사라지는 게 아니라 <b>단단한 핵에서 멈춘다.</b>
@@ -768,9 +887,30 @@ figcaption {
     </div>
   </article></section>
 
-  <!-- 13 눈으로 -->
+  <!-- 13 26장 전부 -->
   <section class="stage"><article class="slide">
-    <div class="head"><span class="eyebrow">오류 분석 ④ 눈으로 확인</span><span class="num">13</span></div>
+    <div class="head"><span class="eyebrow">오류 분석 ④ 그 26장</span><span class="num">14</span></div>
+    <div class="body">
+      <h2>이것이 그 <span class="hl">25장</span>이다</h2>
+      <figure>
+        <img src="{{IMG_CONSENSUS}}" style="max-height:31cqw"
+             alt="다섯 모델이 모두 같은 답으로 틀린 25장을 한 장에 늘어놓은 격자. 빨간 테두리는 다섯 모델 모두 90% 이상 확신한 13장.">
+        <figcaption>각 칸은 <b>정답 → 다섯 모델의 공통된 답</b> · 아래 숫자는 이미지 번호와 최소 확신도 ·
+          <b>빨강</b>은 다섯 모델 전부 90% 이상 확신한 13장</figcaption>
+      </figure>
+      <div class="cols c-1-1">
+        <p>다섯 모델이 모두 틀린 것은 26장, 그중 <strong>답까지 같은 것이 25장</strong>이다.
+          3,421장 중 이것뿐이지만, 시드를 바꿔도 해상도를 바꿔도 구조를 바꿔도
+          <strong>그대로 남는다.</strong></p>
+        <p class="mono" style="font-size:1.2cqw;color:var(--muted);">
+          22 / 25 장이 미성숙 과립구를 낀다 · 가장 많은 쌍은 호중구 → 미성숙 과립구 7장</p>
+      </div>
+    </div>
+  </article></section>
+
+  <!-- 14 눈으로 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">오류 분석 ⑤ 눈으로 확인</span><span class="num">15</span></div>
     <div class="body">
       <h2>핵이 <span class="hl">나뉘었는가</span>, 안 나뉘었는가</h2>
       <div class="cols c-7-5">
@@ -798,7 +938,7 @@ figcaption {
 
   <!-- 14 한계 -->
   <section class="stage"><article class="slide">
-    <div class="head"><span class="eyebrow">한계</span><span class="num">14</span></div>
+    <div class="head"><span class="eyebrow">한계</span><span class="num">16</span></div>
     <div class="body">
       <h2>말할 수 없는 것을 먼저 적는다</h2>
       <div class="cols c-1-1">
@@ -819,7 +959,7 @@ figcaption {
 
   <!-- 15 배운 것 -->
   <section class="stage"><article class="slide">
-    <div class="head"><span class="eyebrow">배운 것</span><span class="num">15</span></div>
+    <div class="head"><span class="eyebrow">배운 것</span><span class="num">17</span></div>
     <div class="body">
       <h2>세 번 틀렸고,<br>세 번 다 <span class="hl">재서</span> 잡았다</h2>
       <div class="cols c-1-1">
@@ -850,7 +990,7 @@ figcaption {
 
   <!-- 16 마무리 -->
   <section class="stage"><article class="slide turn">
-    <div class="head"><span class="eyebrow">마무리</span><span class="num">16</span></div>
+    <div class="head"><span class="eyebrow">마무리</span><span class="num">18</span></div>
     <div class="body" style="justify-content:center;">
       <h2>"98% 맞혔습니다"는 누구나 한다.<br><span class="hl">남은 2%가 무엇인지 아는 것</span>이<br>이 프로젝트의 결과다.</h2>
       <div class="cover-meta" style="margin-top:1.5cqw;">
@@ -862,7 +1002,7 @@ figcaption {
 </div>
 
 <nav class="rail" aria-label="슬라이드 이동">
-  <span class="count" id="count">01 / 17</span>
+  <span class="count" id="count">01 / 19</span>
   <div class="dots" id="dots"></div>
   <span class="hint">← → 또는 스크롤 · P 인쇄</span>
 </nav>

@@ -164,6 +164,53 @@ def pair_figure(images: np.ndarray, dataset, model, layer, device,
     _save(fig, out)
 
 
+def contact_sheet(images: np.ndarray, cases: list[dict], out: Path,
+                  cols: int = 7) -> None:
+    """공통 오분류 **전부**를 한 장에 늘어놓는다.
+
+    쌍별 격자는 근거를 따지기에는 좋지만 "그래서 몇 장인데?"에 답하지 못한다.
+    26장을 한 화면에 놓으면 크기가 손에 잡힌다 — 3,421장 중 이것뿐이라는 것도,
+    그런데도 우연으로는 설명되지 않는다는 것도.
+    """
+    n = len(cases)
+    rows = max(1, -(-n // cols))
+    fig, axes = plt.subplots(rows, cols, figsize=(cols * 1.5, rows * 1.95),
+                             squeeze=False)
+
+    short = {name: ko for name, ko in zip(CLASS_NAMES, CLASS_NAMES_KO)}
+
+    for r in range(rows):
+        for c in range(cols):
+            ax = axes[r][c]
+            ax.set_xticks([])
+            ax.set_yticks([])
+            i = r * cols + c
+            if i >= n:
+                ax.axis("off")
+                continue
+
+            case = cases[i]
+            ax.imshow(images[case["index"]], interpolation="nearest")
+            conf = case.get("min_confidence", 0.0)
+            ax.set_title(
+                f"{short.get(case['true'], case['true'])[:6]}"
+                f" → {short.get(case['pred'], case['pred'])[:6]}\n"
+                f"#{case['index']} · {conf:.2f}",
+                fontsize=6.5, pad=2,
+                # 전부가 확신에 차서 틀린 것은 아니다. 그 차이를 색으로 남긴다.
+                color="tab:red" if conf >= 0.9 else "0.35")
+            for side in ax.spines.values():
+                side.set_color("tab:red" if conf >= 0.9 else "0.75")
+                side.set_linewidth(1.4 if conf >= 0.9 else 0.8)
+
+    confident = sum(1 for c in cases if c.get("min_confidence", 0) >= 0.9)
+    fig.suptitle(
+        f"모든 모델이 같은 답으로 틀린 {n}장 — 빨강은 전부 90% 이상 확신한 {confident}장",
+        fontsize=11)
+    fig.tight_layout()
+    _save(fig, out)
+
+
 def _save(fig, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fig.savefig(path, dpi=150, bbox_inches="tight")
@@ -194,6 +241,10 @@ def main(argv: list[str] | None = None) -> int:
         keep_idx = {c["index"] for c in consensus["cases"]}
         wrong = np.array([i for i in wrong if int(i) in keep_idx], dtype=int)
         title = f"{len(consensus['runs'])}개 모델 공통"
+
+        # 전체를 한 장에. 쌍별 격자는 근거를 따지는 용도이고, 이건 규모를 보는 용도다.
+        sheet = ROOT / "runs" / args.run / "errors" / "consensus_all.png"
+        contact_sheet(images, consensus["cases"], sheet)
     elif args.all_classes:
         title = "전체"
     else:
