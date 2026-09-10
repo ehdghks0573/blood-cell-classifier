@@ -1,0 +1,60 @@
+{
+  "class_basophil": {
+    "class": "basophil",
+    "index": 2483,
+    "confidence": 1.0
+  },
+  "class_eosinophil": {
+    "class": "eosinophil",
+    "index": 3377,
+    "confidence": 1.0
+  },
+  "class_erythroblast": {
+    "class": "erythroblast",
+    "index": 195,
+    "confidence": 1.0
+  },
+  "class_ig": {
+    "class": "immature granulocytes",
+    "index": 54,
+    "confidence": 1.0
+  },
+  "class_lymphocyte": {
+    "class": "lymphocyte",
+    "index": 92,
+    "confidence": 1.0
+  },
+  "class_monocyte": {
+    "class": "monocyte",
+    "index": 747,
+    "confidence": 1.0
+  },
+  "class_neutrophil": {
+    "class": "neutrophil",
+    "index": 3328,
+    "confidence": 1.0
+  },
+  "class_platelet": {
+    "class": "platelet",
+    "index": 3402,
+    "confidence": 1.0
+  },
+  "case_neutrophil_to_ig": {
+    "true": "neutrophil",
+    "pred": "immature granulocytes",
+    "index": 35,
+    "min_confidence": 0.9841
+  },
+  "case_ig_to_monocyte": {
+    "true": "immature granulocytes",
+    "pred": "monocyte",
+    "index": 3015,
+    "min_confidence": 0.9997
+  },
+  "case_ig_to_neutrophil": {
+    "true": "immature granulocytes",
+    "pred": "neutrophil",
+    "index": 1629,
+    "min_confidence": 0.9756
+  }
+}

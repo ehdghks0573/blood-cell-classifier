@@ -27,7 +27,6 @@ ROOT = Path(__file__).resolve().parent.parent
 #: 사진 성격인 것은 JPEG 로 줄이고, 글자가 든 그림은 PNG 로 둔다.
 #: JPEG 로 글자를 누르면 축 라벨과 숫자가 뭉개진다.
 FIGURES = {
-    "IMG_SAMPLES":   ("outputs/samples.png",                          1000, "JPEG"),
     "IMG_CONFUSION": ("runs/{run}/confusion_test.png",                 1000, "PNG"),
     "IMG_GRADCAM":   ("runs/{run}/gradcam_classes.png",                1150, "JPEG"),
     "IMG_ERRORS":    ("runs/{run}/errors/"
@@ -79,6 +78,23 @@ def main(argv: list[str] | None = None) -> int:
 
     html = src.read_text(encoding="utf-8")
     missing = []
+
+    # 세포 낱장 — docs/figures/<이름>.png 가 {{CELL_<이름>}} 이 된다.
+    # 목록을 손으로 관리하면 tools/extract_cells.py 가 새 이미지를 뽑을 때마다
+    # 여기도 고쳐야 한다. 폴더를 그대로 읽는다.
+    cells = sorted((ROOT / "docs" / "figures").glob("*.png"))
+    used = 0
+    for path in cells:
+        placeholder = "{{CELL_" + path.stem + "}}"
+        if placeholder not in html:
+            continue
+        # 28px 원본을 정수배로 키운 그림이라 줄이지 않는다. 부드럽게 늘리거나
+        # JPEG 로 누르면 핵이 나뉘었는지가 흐려진다 — 그게 발표의 핵심이다.
+        uri, kb = data_uri(path, 10_000, "PNG", args.quality)
+        html = html.replace(placeholder, uri)
+        used += 1
+    if used:
+        print(f"  세포 낱장 {used}장 (docs/figures/)")
 
     for token, (rel, width, fmt) in FIGURES.items():
         path = ROOT / rel.format(run=args.run)
