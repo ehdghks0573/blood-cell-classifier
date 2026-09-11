@@ -51,6 +51,11 @@ $epochs = if ($Quick) { 3 } else { 20 }
 $suffix = if ($Quick) { "_quick" } else { "" }
 
 # 재현에 필요한 네 모델. 시드·해상도·구조를 다르게 두는 것이 핵심 발견의 근거다.
+#
+# ResNet50 은 여기 없다. 혼자 120.8분이 걸려 S6(30분 이내)을 못 넘기기 때문이다.
+# 그래서 이 스크립트가 내는 공통 오분류는 **27장**이고, 문서가 인용하는 26장은
+# ResNet50 까지 넣은 값이다. 숫자가 안 맞는다고 놀랄 자리라 미리 적어 둔다.
+# 26장을 보려면 docs/results.md 5절의 명령 두 줄을 따로 돌린다.
 $runs = @(
     @{ name = "res112_resnet18$suffix";   args = @("--arch", "resnet18", "--input-size", "112", "--seed", "42") },
     @{ name = "res112_seed43$suffix";     args = @("--arch", "resnet18", "--input-size", "112", "--seed", "43") },
@@ -170,7 +175,7 @@ if ($Hires) {
     Invoke-Step "고해상도까지 넣은 공통 오분류" (@("tools\consensus_errors.py", "--runs") +
                                                  $runNames + @($hiresRun, "--size") + $hiresSizes +
                                                  @("--save", $hiresJson))
-    Invoke-Step "그 26장이 살아남았는가" @("tools\survivors.py",
+    Invoke-Step "그 장들이 해상도 탓이었는가" @("tools\survivors.py",
                                            "--before", $consensusJson,
                                            "--after", $hiresJson,
                                            "--save", $survivorsJson)
