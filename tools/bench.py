@@ -5,10 +5,12 @@
 어느 쪽이 병목인지 바로 보인다.
 
     python tools/bench.py
+    python tools/bench.py --size 224 --input-size 112   # 고해상도 원본일 때
 """
 
 from __future__ import annotations
 
+import argparse
 import sys
 import time
 from pathlib import Path
@@ -73,10 +75,22 @@ def bench_gpu(input_size: int) -> float:
     return (time.perf_counter() - t0) / BATCHES
 
 
-def main() -> int:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    p = argparse.ArgumentParser(description="학습 병목 측정")
+    # 원본이 커지면 로딩 비용만 커진다. GPU 는 입력 크기만 본다.
+    p.add_argument("--size", type=int, default=28, choices=[28, 64, 128, 224],
+                   help="원본 데이터 해상도")
+    p.add_argument("--input-size", type=int, default=224, help="모델 입력 해상도")
+    p.add_argument("--workers", type=int, nargs="+", default=[0, 2, 4],
+                   help="비교할 num_workers 값들")
+    return p.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
     make_output_encodable()
+    args = parse_args(argv)
     root = ROOT / "data"
-    size, input_size = 28, 224
+    size, input_size = args.size, args.input_size
     steps_per_epoch = 11959 // BATCH_SIZE
 
     print(f"배치 {BATCH_SIZE} · {size}px → {input_size}px · 에폭당 {steps_per_epoch} 스텝\n")
@@ -86,7 +100,7 @@ def main() -> int:
           f"→ 에폭 {gpu * steps_per_epoch:5.0f}초")
 
     print()
-    for nw in (0, 2, 4):
+    for nw in args.workers:
         t = bench_loader(root, size, input_size, nw)
         print(f"데이터 로딩만 (workers={nw}) : {t * 1000:6.1f} ms/배치  "
               f"→ 에폭 {t * steps_per_epoch:5.0f}초")

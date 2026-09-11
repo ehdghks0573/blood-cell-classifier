@@ -16,12 +16,13 @@
 
 | | |
 | --- | ---: |
-| test macro F1 (EfficientNet-B0) | **0.9791** |
+| test macro F1 (224px 원본, ResNet18) | **0.9826** |
 | 틀린 것 중 미성숙 과립구가 낀 것 | **83%** |
 | **서로 다른 다섯 모델이 똑같이 틀린 장** | **26장** |
 | 그게 우연히 겹칠 기댓값 | 0.00장 |
+| **원본 해상도를 8배로 올려도 남은 장** | **14장** |
 
-구조 3종(ResNet18 · ResNet50 · EfficientNet-B0) · 시드 2종 · 해상도 2종으로
+구조 3종(ResNet18 · ResNet50 · EfficientNet-B0) · 시드 2종 · 입력 2종으로
 학습한 다섯 모델이 **같은 26장**을 틀리고, 25장은 **같은 답으로**, 13장은
 **다섯 다 90% 이상 확신**하며 틀린다.
 
@@ -29,7 +30,14 @@
 더해 27장, ResNet50 까지 더해 26장. 겹침이 사라지는 것이 아니라 단단한 핵에서
 멈춘다. 학습의 우연으로는 설명되지 않는다 — 원인은 그 이미지들에 있다.
 
-그 이미지들을 눈으로 보면 **핵이 분엽되지 않았다.** 성숙한 호중구는 핵이
+**그래서 데이터를 바꿔 봤다.** 다섯 모델은 구조도 시드도 달랐지만 원본 픽셀은
+다 같은 28px 파일이었다. 224px 원본을 받아 다시 학습하니 **26장 중 12장이
+풀리고 14장이 남았다.** 갈린 선이 우연이 아니다 — 되찾은 12장은 거의 전부
+**과립·세포질 질감**으로 갈리는 쌍이고(28px 에서는 뭉개져 사라지는 정보),
+남은 14장은 거의 전부 **핵의 분엽 여부**, 즉 성숙 단계의 경계다(28px 에서도
+보이는 구조라 해상도를 올려도 새로 얻을 것이 없다).
+
+그 남은 장들을 눈으로 보면 **핵이 분엽되지 않았다.** 성숙한 호중구는 핵이
 여러 조각으로 나뉘는데, "neutrophil" 라벨이 붙은 이 장들은 아직 안 나뉜 모습이다.
 
 자세한 내용은 [`docs/results.md`](docs/results.md), 발표 자료는
@@ -97,6 +105,22 @@ python tools/extract_cells.py --run my_run
 python tools/build_slides.py --run my_run
 ```
 
+**224px 원본으로 다시 재기** — 공통 오분류가 해상도 탓인지 가른다 (1.5GB 내려받음).
+
+```bash
+python tools/fetch_hires.py --size 224          # Zenodo 가 죽어 있으면 기다렸다 받는다
+python tools/check_alignment.py                 # 28px 과 224px 이 같은 순서인지 먼저 잰다
+python train.py --size 224 --input-size 112 --epochs 20 --name hires224_res18_112
+python tools/consensus_errors.py --runs <저해상도 모델들> hires224_res18_112 --size 28 28 28 224 --save runs/consensus_errors_hires.json
+python tools/survivors.py --before runs/consensus_errors.json --after runs/consensus_errors_hires.json
+```
+
+`--size` 는 값 하나면 모든 모델에, 여러 개면 `--runs` 순서대로 짝지어 쓴다.
+28px 로 배운 모델에 224px 원본을 먹이면 그 모델이 본 적 없는 선명도가 들어가
+비교가 기운다. **인덱스 정렬 검증을 건너뛰면 그 뒤 결과가 전부 조용히
+무의미해진다** — 224px 의 3421번이 28px 의 3421번과 다른 사진이면 비교할 것이
+없기 때문이다.
+
 주요 옵션 — `--arch resnet18|resnet50|efficientnet_b0` · `--input-size` ·
 `--batch-size` · `--seed` · `--cpu`. VRAM 이 모자라면 `--batch-size 16` 부터
 줄인다 (안내 메시지가 알려준다).
@@ -124,10 +148,13 @@ src/
   plots.py            그림 저장
 
 tools/
-  fetch_data.py       데이터 내려받기
+  fetch_data.py       데이터 내려받기 (28px)
+  fetch_hires.py      224px 원본 내려받기 — 받는 곳이 죽어도 기다렸다 받는다
+  check_alignment.py  해상도 간 인덱스 정렬 검증 — 비교의 전제
   check_gpu.py        GPU 실동작 검증
   bench.py            병목 측정 — 데이터 로딩 vs GPU 연산
   consensus_errors.py 모델 간 공통 오분류
+  survivors.py        그 공통 오분류가 다음 조건에서도 남는가
   extract_cells.py    발표용 세포 낱장
   build_slides.py     슬라이드 빌드
   run_all.ps1         전체 재현
@@ -138,7 +165,7 @@ docs/
   experiments.md      실험 비교표
   slides.html         발표 자료 (17장)
 
-tests/                단위 테스트 70개
+tests/                단위 테스트 90개
 ```
 
 ---
@@ -180,8 +207,9 @@ S3 는 기준을 통과한 정도가 아니라 **20에폭 학습곡선까지 완
 ## 한계
 
 - **임상에 쓸 수 없다.** 검증을 거치지 않았다.
-- **28×28 픽셀.** 고해상도 원본을 확보하지 못했다. 지금의 "112px 입력"은
-  28px 를 늘린 것이다.
+- **고해상도는 한 번만 확인했다.** 224px 원본으로 ResNet18 을 한 번 다시 학습해
+  공통 오분류의 12장이 저해상도 탓이었음을 보였지만, 다른 구조도 같은 12장을
+  되찾는지는 재지 않았다. 나머지 지표와 Grad-CAM 은 아직 28px 원본 기준이다.
 - **데이터셋 하나.** 다른 병원·장비·염색 조건은 보장할 수 없다.
 - **오분류가 83장뿐이라** 확신도 비교 3건(P1~P3)은 통계적으로 판정하지 못했다.
   "차이가 없다"가 아니라 **"이 표본으로는 말할 수 없다"** 이다.

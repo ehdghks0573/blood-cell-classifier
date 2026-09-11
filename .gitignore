@@ -14,3 +14,6 @@ runs/
 # 결과 이미지는 리포트용만 골라서 커밋한다
 outputs/
 !outputs/.gitkeep
+
+# 실행 로그 (재현하면 다시 생긴다)
+logs/

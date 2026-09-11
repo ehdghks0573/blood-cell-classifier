@@ -1,6 +1,7 @@
 """여러 모델이 **같은 이미지를** 틀리는가 (S5 의 결정적 증거).
 
     python tools/consensus_errors.py --runs res112_resnet18 res112_seed43 baseline_resnet18_28px
+    python tools/consensus_errors.py --runs res112_resnet18 hires224_res18_112 --size 28 224
 
 눈으로 보는 검증에는 한계가 있다. 사람이 "이건 라벨이 이상한데" 하고 느껴도
 그건 인상이지 증거가 아니다. 숫자로 물을 수 있는 형태로 바꾸면 이렇게 된다.
@@ -47,7 +48,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="여러 모델의 오분류가 겹치는지 본다")
     p.add_argument("--runs", nargs="+", required=True, help="runs/ 아래 실행 이름들")
     p.add_argument("--data-root", default=str(ROOT / "data"))
-    p.add_argument("--size", type=int, default=28, choices=[28, 64, 128, 224])
+    p.add_argument("--size", type=int, nargs="+", default=[28], choices=[28, 64, 128, 224],
+                   help="원본 데이터 해상도. 값 하나면 모든 모델에, "
+                        "여러 개면 --runs 순서대로 하나씩 짝지어 쓴다")
     p.add_argument("--split", default="test", choices=["train", "val", "test"])
     p.add_argument("--confident", type=float, default=0.90,
                    help="이 확률 이상으로 틀린 것을 '확신에 차서 틀렸다'로 본다")
@@ -73,18 +76,38 @@ def main(argv: list[str] | None = None) -> int:
         raise UserError("모델이 둘 이상 필요합니다. 겹침을 재려면 비교 대상이 있어야 합니다.\n"
                         "예: python tools/consensus_errors.py --runs effb0_112 res112_resnet18")
 
+    # 모델마다 배운 원본 해상도가 다를 수 있다. 28px 로 배운 모델에 224px 원본을
+    # 먹이면 그 모델이 본 적 없는 선명도가 들어가 비교가 기울어진다. 각자 자기
+    # 해상도로 재고, 겹침은 **테스트셋 인덱스**로 맞춘다.
+    if len(args.size) == 1:
+        sizes = args.size * len(args.runs)
+    elif len(args.size) == len(args.runs):
+        sizes = list(args.size)
+    else:
+        raise UserError(
+            f"--size 는 값 하나이거나 --runs 개수({len(args.runs)})와 같아야 합니다. "
+            f"{len(args.size)}개를 받았습니다.")
+
     device = pick_device(args.cpu)
 
     preds, probs_all, truth = {}, {}, None
-    for run in args.runs:
+    for run, size in zip(args.runs, sizes):
         y_true, y_pred, probs, ckpt = predictions_for(
-            run, args.data_root, args.size, args.split, device)
-        truth = y_true if truth is None else truth
+            run, args.data_root, size, args.split, device)
+        # 해상도가 섞이면 인덱스가 같은 사진을 가리킨다는 보장이 필요하다.
+        # tools/check_alignment.py 가 그걸 재지만, 여기서도 라벨로 한 번 더 막는다.
+        if truth is None:
+            truth = y_true
+        elif not np.array_equal(truth, y_true):
+            raise UserError(
+                f"{run} 의 정답 라벨이 앞 모델과 다릅니다 (원본 {size}px). "
+                "해상도별 파일의 분할 순서가 어긋났다는 뜻이라 비교할 수 없습니다. "
+                "python tools/check_alignment.py 로 확인하세요.")
         preds[run] = y_pred
         probs_all[run] = probs
         n_wrong = int((y_pred != y_true).sum())
-        print(f"{run:26s} 입력 {ckpt['input_size']}px · 오분류 {n_wrong}장 "
-              f"({n_wrong / len(y_true):.2%})")
+        print(f"{run:26s} 원본 {size:3d}px → 입력 {ckpt['input_size']}px · "
+              f"오분류 {n_wrong}장 ({n_wrong / len(y_true):.2%})")
 
     n = len(truth)
     wrong = {r: (preds[r] != truth) for r in args.runs}
@@ -147,10 +170,15 @@ def main(argv: list[str] | None = None) -> int:
     if args.save:
         out = {
             "runs": args.runs,
+            "sizes": sizes,
             "split": args.split,
             "n": int(n),
             "error_rates": [round(float(x), 5) for x in rates],
             "all_wrong": int(all_wrong.sum()),
+            # 인덱스를 남긴다. 아래 cases 는 **같은 방향으로** 틀린 것만이라
+            # 한 장이 빠진다. 나중에 "그 26장이 살아남았는가"를 물으려면
+            # 방향과 무관하게 전부 필요하다.
+            "all_wrong_indices": [int(i) for i in idx],
             "expected_by_chance": round(expected_all, 3),
             "same_direction": int(same_pred.sum()),
             "confident": int(confident.sum()),
