@@ -29,6 +29,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
+from src.console import make_output_encodable  # noqa: E402
 from inspect_errors import prototypes  # noqa: E402
 from src.data import (  # noqa: E402
     CLASS_NAMES,
@@ -74,6 +75,7 @@ def save(img: np.ndarray, path: Path, scale: int) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
+    make_output_encodable()
     args = parse_args(argv)
     run_dir = ROOT / "runs" / args.run
     ckpt_path = run_dir / "best.pt"

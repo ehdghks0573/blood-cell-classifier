@@ -19,6 +19,7 @@ import torch.nn as nn
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from src.console import make_output_encodable  # noqa: E402
 from src.data import NUM_CLASSES, BloodDataset, build_transform, load_split  # noqa: E402
 from src.model import build_model  # noqa: E402
 
@@ -73,6 +74,7 @@ def bench_gpu(input_size: int) -> float:
 
 
 def main() -> int:
+    make_output_encodable()
     root = ROOT / "data"
     size, input_size = 28, 224
     steps_per_epoch = 11959 // BATCH_SIZE

@@ -11,6 +11,10 @@ from pathlib import Path
 import medmnist
 from medmnist import INFO
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from src.console import make_output_encodable  # noqa: E402
+
 FLAG = "bloodmnist"
 SIZES = [64, 224]
 
@@ -20,6 +24,7 @@ ROOT.mkdir(parents=True, exist_ok=True)
 
 
 def main() -> int:
+    make_output_encodable()
     print(f"medmnist {medmnist.__version__}")
 
     info = INFO[FLAG]

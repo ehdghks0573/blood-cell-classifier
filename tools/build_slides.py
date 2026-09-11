@@ -23,6 +23,9 @@ from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+
+from src.console import make_output_encodable  # noqa: E402
 
 #: 자리표시자 → (파일, 가로 최대 픽셀, 형식)
 #: 사진 성격인 것은 JPEG 로 줄이고, 글자가 든 그림은 PNG 로 둔다.
@@ -87,6 +90,7 @@ def data_uri(path: Path, max_width: int, fmt: str, quality: int) -> tuple[str, i
 
 
 def main(argv: list[str] | None = None) -> int:
+    make_output_encodable()
     args = parse_args(argv)
     src = Path(args.src)
     if not src.exists():

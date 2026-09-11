@@ -20,6 +20,7 @@ from typing import Callable
 
 import torch
 
+from .console import make_output_encodable
 from .data import NUM_CLASSES
 from .model import build_model
 
@@ -117,6 +118,7 @@ def guard(main: Callable[[list[str] | None], int], argv: list[str] | None = None
     돌려주는 값이 그대로 종료 코드가 되므로, 스크립트에서 이어 붙일 때
     실패를 감지할 수 있다 (Day 11 의 run_all).
     """
+    make_output_encodable()
     try:
         return main(argv)
     except UserError as exc:

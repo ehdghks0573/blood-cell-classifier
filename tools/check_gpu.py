@@ -6,12 +6,19 @@ is_available() 은 True 를 반환하고 실제 연산에서 터진다.
 그래서 행렬곱과 conv 를 실제로 돌려보고, 속도까지 잰다.
 """
 
+import sys
 import time
+from pathlib import Path
 
 import torch
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from src.console import make_output_encodable  # noqa: E402
+
 
 def main() -> int:
+    make_output_encodable()
     print(f"torch          : {torch.__version__}")
     print(f"CUDA 빌드      : {torch.version.cuda}")
     print(f"is_available   : {torch.cuda.is_available()}")

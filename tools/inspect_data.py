@@ -14,6 +14,10 @@ import numpy as np
 
 from medmnist import INFO
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from src.console import make_output_encodable  # noqa: E402
+
 FLAG = "bloodmnist"
 ROOT = Path(__file__).resolve().parents[1] / "data"
 
@@ -65,6 +69,7 @@ def describe(name: str, path: Path, labels: dict) -> None:
 
 
 def main() -> int:
+    make_output_encodable()
     labels = INFO[FLAG]["label"]
     print(f"BloodMNIST · {len(labels)}클래스 · {INFO[FLAG]['task']}")
 

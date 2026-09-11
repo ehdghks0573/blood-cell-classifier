@@ -15,11 +15,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from src.console import make_output_encodable  # noqa: E402
 from src import plots  # noqa: E402
 from src.data import CLASS_NAMES, available_sizes, load_split  # noqa: E402
 
 
 def main() -> int:
+    make_output_encodable()
     data_root = ROOT / "data"
     sizes = available_sizes(data_root)
     if not sizes:
