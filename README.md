@@ -105,10 +105,18 @@ python tools/extract_cells.py --run my_run
 python tools/build_slides.py --run my_run
 ```
 
-**224px 원본으로 다시 재기** — 공통 오분류가 해상도 탓인지 가른다 (1.5GB 내려받음).
+**224px 원본으로 다시 재기** — 공통 오분류가 해상도 탓인지 가른다.
+한 줄로도 되고, 단계별로도 된다.
+
+```powershell
+.\tools\run_all.ps1 -Hires      # 내려받기 → 정렬 검증 → 학습 → 생존 판정까지
+```
+
+1.5GB 를 내려받기 때문에 기본 경로에서 빼 뒀다. 그것이 없는 사람도 나머지는
+전부 재현할 수 있어야 한다.
 
 ```bash
-python tools/fetch_hires.py --size 224          # Zenodo 가 죽어 있으면 기다렸다 받는다
+python tools/fetch_hires.py --size 224          # 받는 곳이 죽어 있으면 기다렸다 받는다
 python tools/check_alignment.py                 # 28px 과 224px 이 같은 순서인지 먼저 잰다
 python train.py --size 224 --input-size 112 --epochs 20 --name hires224_res18_112
 python tools/consensus_errors.py --runs <저해상도 모델들> hires224_res18_112 --size 28 28 28 224 --save runs/consensus_errors_hires.json
@@ -165,7 +173,7 @@ docs/
   experiments.md      실험 비교표
   slides.html         발표 자료 (17장)
 
-tests/                단위 테스트 90개
+tests/                단위 테스트 91개
 ```
 
 ---

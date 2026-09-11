@@ -22,6 +22,18 @@ def cp949_stream(tmp_path):
     return (tmp_path / "log.txt").open("w", encoding="cp949")
 
 
+@pytest.fixture(autouse=True)
+def _no_ambient_pythonioencoding(monkeypatch):
+    """돌리는 사람의 환경변수가 결과를 바꾸지 않게 한다.
+
+    `make_output_encodable` 은 PYTHONIOENCODING 이 있으면 손을 떼도록 **일부러**
+    만들어져 있다(아래 마지막 테스트). 그래서 그 변수를 켜 둔 셸에서 이 파일을
+    돌리면 아래 테스트 셋이 무더기로 깨지고, 코드가 고장 난 것처럼 보인다.
+    실제로 그렇게 한 번 속았다. 검사할 상황을 테스트가 직접 만든다.
+    """
+    monkeypatch.delenv("PYTHONIOENCODING", raising=False)
+
+
 # ── 무엇이 문제였는가 ──
 
 def test_cp949_cannot_hold_an_em_dash(tmp_path):
@@ -85,3 +97,17 @@ def test_calling_twice_is_safe(tmp_path, monkeypatch):
         console.make_output_encodable()
         console.make_output_encodable()
         assert f.errors == "replace"
+
+
+def test_pythonioencoding_was_the_users_choice(tmp_path, monkeypatch):
+    """직접 준 사람의 선택은 건드리지 않는다 — src/console.py 에 적힌 약속이다.
+
+    UTF-8 로 내보내라고 스스로 지정한 사람에게 "못 쓰는 글자는 버린다"를
+    덮어씌우면, 버릴 이유가 없는 글자까지 버리게 된다.
+    """
+    monkeypatch.setenv("PYTHONIOENCODING", "utf-8")
+
+    with cp949_stream(tmp_path) as f:
+        monkeypatch.setattr(sys, "stdout", f)
+        console.make_output_encodable()
+        assert f.errors == "strict"   # 손대지 않았다

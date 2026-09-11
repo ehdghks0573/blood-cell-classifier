@@ -421,7 +421,7 @@ git commit -m "오늘 한 일 요약"
 - [x] `docs/results.md` — 지표, 혼동행렬, 오류 분석
 - [x] `docs/experiments.md` — 실험 비교표
 - [x] Grad-CAM 히트맵 (8클래스 + 정오답 비교)
-- [x] 단위 테스트 — 70개
+- [x] 단위 테스트 — 91개
 - [x] README (한계와 임상 사용 불가 명시)
 - [x] 발표 슬라이드 — 17장 (`docs/slides.html`)
 

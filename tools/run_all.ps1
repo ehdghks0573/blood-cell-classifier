@@ -17,16 +17,23 @@
 .PARAMETER SkipTrain
     학습을 건너뛰고 이미 있는 runs/ 로 분석만 다시 한다.
 
+.PARAMETER Hires
+    224px 원본을 받아 여섯 번째 모델을 학습하고, 공통 오분류가 해상도 탓인지
+    가른다. 기본 경로에서 빼 둔 이유는 **1.5GB 를 내려받기 때문**이다. 그것이
+    없는 사람도 나머지는 전부 재현할 수 있어야 한다.
+
 .EXAMPLE
     .\tools\run_all.ps1 -Quick
     .\tools\run_all.ps1
     .\tools\run_all.ps1 -SkipTrain
+    .\tools\run_all.ps1 -Hires
 #>
 
 [CmdletBinding()]
 param(
     [switch]$Quick,
-    [switch]$SkipTrain
+    [switch]$SkipTrain,
+    [switch]$Hires
 )
 
 $ErrorActionPreference = "Stop"
@@ -57,6 +64,9 @@ $best = "effb0_112$suffix"   # 발표에 쓰는 모델
 # 점검용으로 돌릴 때 완성된 산출물을 덮어쓰면 안 된다. 3에폭짜리 그림이
 # 발표 자료에 실리는 사고는 발표장에서야 발견된다.
 $consensusJson = "runs\consensus_errors$suffix.json"
+$hiresRun      = "hires224_res18_112$suffix"
+$hiresJson     = "runs\consensus_errors_hires$suffix.json"
+$survivorsJson = "runs\hires_survivors$suffix.json"
 $figuresDir    = if ($Quick) { "docs\figures_quick" } else { "docs\figures" }
 $slidesOut     = if ($Quick) { "docs\slides.quick.html" } else { "docs\slides.html" }
 
@@ -108,6 +118,19 @@ if (-not (Test-Path (Join-Path $root "data\bloodmnist.npz"))) {
     Write-Host "── 데이터 있음 (data\bloodmnist.npz) ─" -ForegroundColor DarkGray
 }
 
+# ── 2-b. 224px 원본 ────────────────────────────────────────────────
+# 정렬 검증이 학습보다 먼저다. 인덱스가 어긋나 있으면 20분을 학습한 뒤에야
+# "비교할 수 없다"를 알게 된다.
+if ($Hires) {
+    if (-not (Test-Path (Join-Path $root "data\bloodmnist_224.npz"))) {
+        Invoke-Step "224px 원본 내려받기 (1.5GB)" @("tools\fetch_hires.py", "--size", "224")
+    } else {
+        Write-Host ""
+        Write-Host "── 224px 원본 있음 (data\bloodmnist_224.npz) ─" -ForegroundColor DarkGray
+    }
+    Invoke-Step "해상도 간 인덱스 정렬 검증" @("tools\check_alignment.py")
+}
+
 # ── 3. 학습 ─────────────────────────────────────────────────────────
 if ($SkipTrain) {
     Write-Host ""
@@ -115,6 +138,13 @@ if ($SkipTrain) {
 } else {
     foreach ($r in $runs) {
         Invoke-Step "학습 · $($r.name)" (@("train.py", "--epochs", "$epochs", "--name", $r.name) + $r.args)
+    }
+    if ($Hires) {
+        # 바꾸는 것은 원본 해상도 하나뿐이다. 입력 크기도 구조도 시드도
+        # res112_resnet18 과 같아야 둘을 견줄 수 있다.
+        Invoke-Step "학습 · $hiresRun (224px 원본)" @("train.py", "--epochs", "$epochs",
+            "--name", $hiresRun, "--arch", "resnet18", "--size", "224",
+            "--input-size", "112", "--seed", "42")
     }
 }
 
@@ -133,6 +163,19 @@ Invoke-Step "공통 오분류 비교 격자" @("inspect_errors.py", "--run", $be
                                       "--from-json", $consensusJson,
                                       "--pairs", "3", "--per-pair", "5", "--refs", "4")
 
+if ($Hires) {
+    # 모델마다 자기 원본 해상도로 잰다. 28px 로 배운 모델에 224px 를 먹이면
+    # 그 모델이 본 적 없는 선명도가 들어가 비교가 기운다.
+    $hiresSizes = @($runNames | ForEach-Object { "28" }) + @("224")
+    Invoke-Step "고해상도까지 넣은 공통 오분류" (@("tools\consensus_errors.py", "--runs") +
+                                                 $runNames + @($hiresRun, "--size") + $hiresSizes +
+                                                 @("--save", $hiresJson))
+    Invoke-Step "그 26장이 살아남았는가" @("tools\survivors.py",
+                                           "--before", $consensusJson,
+                                           "--after", $hiresJson,
+                                           "--save", $survivorsJson)
+}
+
 # ── 6. 발표 자료 ────────────────────────────────────────────────────
 Invoke-Step "세포 낱장 추출"      @("tools\extract_cells.py", "--run", $best,
                                     "--consensus", $consensusJson, "--out", $figuresDir)
@@ -147,6 +190,9 @@ Write-Host ""
 Write-Host "결과"
 Write-Host "  runs\$best\                지표 · 혼동행렬 · 히트맵 · 오류 격자"
 Write-Host "  $consensusJson   모델 간 공통 오분류"
+if ($Hires) {
+    Write-Host "  $survivorsJson  해상도를 올려도 남은 장"
+}
 Write-Host "  $slidesOut          발표 자료"
 Write-Host "  docs\results.md            결과 서술 (직접 갱신해야 함)"
 if ($Quick) {
