@@ -881,6 +881,9 @@ figcaption {
             <b>가장 나쁜 모델을 넣어도 같다.</b> ResNet50 은 성능이 제일 낮고
             제일 많이 틀리는데(86장), 그 안에 이 26장이 그대로 들어 있다.
             "덜 좋은 모델이라 더 틀린 것"으로는 설명되지 않는다.
+            <br><br>
+            <b>여기까지가 모델로 물을 수 있는 전부다.</b> 다섯 다 원본 픽셀이
+            같았다는 점은 아직 남아 있다 — 16번 장에서 그것을 바꿔 본다.
           </div>
         </div>
       </div>
@@ -936,15 +939,89 @@ figcaption {
     </div>
   </article></section>
 
-  <!-- 14 한계 -->
+  <!-- 16 해상도를 올렸다 -->
   <section class="stage"><article class="slide">
-    <div class="head"><span class="eyebrow">한계</span><span class="num">16</span></div>
+    <div class="head"><span class="eyebrow">오류 분석 ⑥ 데이터를 바꿨다</span><span class="num">16</span></div>
+    <div class="body">
+      <h2>모델을 더해도 안 갈리던 것이,<br><span class="hl">데이터를 바꾸니</span> 갈렸다</h2>
+      <div class="cols c-5-7">
+        <div class="body">
+          <span class="giant">14</span>
+          <p class="lede">26장 중 <strong>남은 장</strong>.
+            원본을 <strong class="mono">8배</strong>로 키우자 12장이 풀렸다.</p>
+          <div class="plain">
+            <span class="tag">아직 남아 있던 반론</span>
+            <p>다섯 모델은 구조도 시드도 달랐지만 <strong>원본 픽셀은 다 같은
+              28픽셀 파일</strong>이었다. 뭉개면서 사라진 단서가 있다면,
+              26장은 라벨이 아니라 <strong>해상도</strong>의 문제다.</p>
+          </div>
+          <div class="note">
+            <b>비교의 전제부터 쟀다.</b> "그 26장"은 테스트셋 번호다.
+            224픽셀의 3421번이 28픽셀의 3421번과 다른 사진이면 전부 무의미해진다.
+            라벨이 세 분할 모두 일치하고, 일부러 <b>한 칸 어긋나게</b> 짝지은
+            대조군과 픽셀 차이가 <b>6.5 대 35.7</b> 로 갈리는 것을 확인했다.
+          </div>
+        </div>
+        <div class="body">
+          <figure role="img"
+                  aria-label="공통 오분류 26장을 헷갈린 축별로 나누면, 핵의 분엽 여부로 갈리는 12장 중 11장은 고해상도에서도 남고, 과립과 세포질 질감으로 갈리는 10장은 전부 풀린다.">
+            <svg viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg">
+              <rect x="210" y="6" width="13" height="13" fill="var(--violet)"/>
+              <text x="229" y="17" font-size="12" fill="var(--ink-2)"
+                    font-family="IBM Plex Sans KR, sans-serif">고해상도에서도 틀린다 (14장)</text>
+              <rect x="410" y="6" width="13" height="13" fill="var(--mint)"/>
+              <text x="429" y="17" font-size="12" fill="var(--ink-2)"
+                    font-family="IBM Plex Sans KR, sans-serif">풀렸다 (12장)</text>
+
+              <text x="196" y="47" font-size="13" fill="var(--ink)" text-anchor="end"
+                    font-family="IBM Plex Sans KR, sans-serif">호중구 ↔ 미성숙 과립구</text>
+              <text x="196" y="63" font-size="11.5" fill="var(--muted)" text-anchor="end"
+                    font-family="IBM Plex Sans KR, sans-serif">핵의 분엽 여부</text>
+              <rect x="210" y="34" width="275" height="30" fill="var(--violet)"/>
+              <rect x="485" y="34" width="25"  height="30" fill="var(--mint)"/>
+              <text x="347" y="54" font-size="16" fill="#150F1D" text-anchor="middle"
+                    font-weight="600" font-family="IBM Plex Mono, monospace">11</text>
+
+              <text x="196" y="112" font-size="13" fill="var(--ink)" text-anchor="end"
+                    font-family="IBM Plex Sans KR, sans-serif">미성숙 과립구 ↔ 그 밖</text>
+              <text x="196" y="128" font-size="11.5" fill="var(--muted)" text-anchor="end"
+                    font-family="IBM Plex Sans KR, sans-serif">과립·세포질 질감</text>
+              <rect x="210" y="99" width="250" height="30" fill="var(--mint)"/>
+              <text x="335" y="119" font-size="16" fill="#0B0810" text-anchor="middle"
+                    font-weight="600" font-family="IBM Plex Mono, monospace">10</text>
+
+              <text x="196" y="184" font-size="13" fill="var(--ink)" text-anchor="end"
+                    font-family="IBM Plex Sans KR, sans-serif">그 밖</text>
+              <rect x="210" y="164" width="75" height="30" fill="var(--violet)"/>
+              <rect x="285" y="164" width="25" height="30" fill="var(--mint)"/>
+              <text x="247" y="184" font-size="16" fill="#150F1D" text-anchor="middle"
+                    font-weight="600" font-family="IBM Plex Mono, monospace">3</text>
+            </svg>
+            <figcaption><b>갈린 선이 우연이 아니다.</b> 해상도가 지우는 단서와, 지우지 않는 단서로 나뉜다</figcaption>
+          </figure>
+          <div class="note">
+            <b>분엽 여부는 28픽셀에서도 보인다.</b> 큰 구조라서 해상도를 올려도
+            새로 얻을 정보가 없다 — 그래서 11장이 그대로 남았다.
+            <b>과립과 질감은 28픽셀에서 물리적으로 사라진다.</b> 고해상도가
+            이 축에서만 10장을 되찾은 것이 그 설명과 맞는다.
+            <br><br>
+            <b>확신도 함께 내려갔다.</b> 26장일 때는 13장을 모두가 90% 이상
+            확신했는데, 남은 14장에서는 5장이다. <b>망설이기 시작했다.</b>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article></section>
+
+  <!-- 17 한계 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">한계</span><span class="num">17</span></div>
     <div class="body">
       <h2>말할 수 없는 것을 먼저 적는다</h2>
       <div class="cols c-1-1">
         <ul>
           <li><strong>임상에 쓸 수 없다.</strong> 검증을 거치지 않았고, 그럴 목적으로 만들지 않았다</li>
-          <li><strong>28픽셀.</strong> 고해상도 원본을 구하지 못했다</li>
+          <li><strong>고해상도는 한 번만 확인했다.</strong> 224픽셀로 ResNet18 을 한 번 다시 학습했을 뿐이라, 다른 구조도 같은 12장을 되찾는지는 재지 않았다</li>
           <li><strong>데이터셋 하나.</strong> 다른 병원·장비·염색 조건은 보장할 수 없다</li>
         </ul>
         <ul>
@@ -959,9 +1036,9 @@ figcaption {
 
   <!-- 15 배운 것 -->
   <section class="stage"><article class="slide">
-    <div class="head"><span class="eyebrow">배운 것</span><span class="num">17</span></div>
+    <div class="head"><span class="eyebrow">배운 것</span><span class="num">18</span></div>
     <div class="body">
-      <h2>세 번 틀렸고,<br>세 번 다 <span class="hl">재서</span> 잡았다</h2>
+      <h2>네 번 틀렸고,<br>네 번 다 <span class="hl">재서</span> 잡았다</h2>
       <div class="cols c-1-1">
         <div class="body">
           <div class="note"><b>① 병목을 짐작했다.</b> 데이터 준비가 느린 줄 알고 일꾼을 늘렸더니
@@ -974,15 +1051,19 @@ figcaption {
             기준을 갈아엎었다.</div>
         </div>
         <div class="body">
-          <p class="lede">셋의 원인은 같다. <strong>짐작을 결과로 적으면 안 되고,
+          <div class="note"><b>④ 남는 이유를 하나로 뭉쳤다.</b> "26장은 데이터의 성질"이라고
+            적고 <b>모델을 더 넣어도 남을 것</b>이라 예측했다. 모델에 대해서는 맞았지만
+            데이터를 바꾸니 12장이 풀렸다. <b>모델을 아무리 더해도 갈리지 않는 축이 있다.</b></div>
+          <p class="lede">넷의 원인은 같다. <strong>짐작을 결과로 적으면 안 되고,
             아무나 통과하는 검사는 검사가 아니다.</strong></p>
           <div class="plain">
             <span class="tag">그래서 성능을 더 올리지 않았다</span>
-            <p>남은 오류는 학습의 운이 아니라 데이터의 성질이다. 점수를 더 올리는 것은
-              <strong>그 경계를 외우는 일</strong>이지 모델이 좋아지는 게 아니다.</p>
+            <p>남은 <strong>14장</strong>은 학습의 운도, 해상도도 아니다. 그 점수를 더
+              올리는 것은 <strong>성숙 단계의 경계를 외우는 일</strong>이지 모델이
+              좋아지는 게 아니다.</p>
           </div>
           <p class="mono" style="font-size:1.2cqw;color:var(--muted);">
-            커밋 11 · 테스트 70 · 학습 실행 8 · 성공 기준 6/6</p>
+            커밋 17 · 테스트 90 · 학습 실행 9 · 성공 기준 6/6</p>
         </div>
       </div>
     </div>
@@ -990,11 +1071,11 @@ figcaption {
 
   <!-- 16 마무리 -->
   <section class="stage"><article class="slide turn">
-    <div class="head"><span class="eyebrow">마무리</span><span class="num">18</span></div>
+    <div class="head"><span class="eyebrow">마무리</span><span class="num">19</span></div>
     <div class="body" style="justify-content:center;">
       <h2>"98% 맞혔습니다"는 누구나 한다.<br><span class="hl">남은 2%가 무엇인지 아는 것</span>이<br>이 프로젝트의 결과다.</h2>
       <div class="cover-meta" style="margin-top:1.5cqw;">
-        <span>BloodMNIST 17,092장</span><span>구조 3 · 실행 8</span><span>test macro F1 0.9791</span>
+        <span>BloodMNIST 17,092장</span><span>구조 3 · 실행 9</span><span>test macro F1 0.9826</span>
       </div>
     </div>
   </article></section>
@@ -1002,7 +1083,7 @@ figcaption {
 </div>
 
 <nav class="rail" aria-label="슬라이드 이동">
-  <span class="count" id="count">01 / 19</span>
+  <span class="count" id="count">01 / 20</span>
   <div class="dots" id="dots"></div>
   <span class="hint">← → 또는 스크롤 · P 인쇄</span>
 </nav>
