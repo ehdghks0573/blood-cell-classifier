@@ -36,6 +36,10 @@ FIGURES = {
     "IMG_ERRORS":    ("runs/{run}/errors/"
                       "neutrophil__to__immature_granulocytes.png",     1500, "JPEG"),
     "IMG_CONSENSUS": ("runs/{run}/errors/consensus_all.png",           1500, "JPEG"),
+    # 이것만 runs/ 가 아니라 docs/ 를 본다. 224px 원본(1.5GB)이 있어야 만들 수
+    # 있는 그림이라, runs/ 를 가리키면 그 데이터가 없는 사람은 슬라이드를 아예
+    # 빌드하지 못한다. .gitignore 의 "리포트용만 골라서 커밋한다"를 따른다.
+    "IMG_BOUNDARY":  ("docs/figures/boundary.png",                     1500, "JPEG"),
 }
 
 

@@ -1013,9 +1013,52 @@ figcaption {
     </div>
   </article></section>
 
-  <!-- 17 한계 -->
+  <!-- 17 경계를 눈으로 -->
   <section class="stage"><article class="slide">
-    <div class="head"><span class="eyebrow">한계</span><span class="num">17</span></div>
+    <div class="head"><span class="eyebrow">오류 분석 ⑦ 그 경계를 눈으로</span><span class="num">17</span></div>
+    <div class="body">
+      <h2>라벨만 <span class="hl">정반대</span>인데,<br>둘을 구분할 수 없다</h2>
+      <div class="cols c-7-5">
+        <figure>
+          <img src="{{IMG_BOUNDARY}}" alt="호중구로 라벨된 6장과 미성숙 과립구로 라벨된 5장을 위아래로 놓고, 아래에 두 클래스의 대표를 깐 비교판. 위 두 줄은 서로 구분되지 않고, 아래 두 대표 줄과는 확연히 다르다.">
+          <figcaption>위 두 줄은 <b>라벨이 서로 반대</b>다 │ 아래 두 줄은 각 클래스의 <b>대표</b></figcaption>
+        </figure>
+        <div class="body">
+          <div class="plain">
+            <span class="tag">한 방향만 보면 반론이 남는다</span>
+            <p>"호중구 라벨인데 미성숙해 보인다"는 <strong>모델이 미성숙 쪽으로
+              기울었다</strong>로도 설명된다. 기울기는 <strong>한쪽으로만</strong>
+              작용한다 — 그러니 반대 방향을 봐야 한다.</p>
+          </div>
+          <ul>
+            <li><strong>대표는 확연히 다르다.</strong> 호중구는 핵이 세 조각 넘게
+              갈라져 실로 이어지고, 미성숙 과립구는 핵이 크고 둥글게 세포를 채운다</li>
+            <li><strong>틀린 두 줄은 구분되지 않는다.</strong> 양쪽 다 핵이 오목하게
+              패이거나 두 덩이로 붙은 <b>중간</b> 모습이고, 어느 쪽도 자기 라벨의
+              대표를 닮지 않았다</li>
+            <li><strong>그래서 모델 탓이 아니다.</strong> 양방향이 같은 자리에
+              모여 있다면 원인은 그 자리의 이미지들이다</li>
+          </ul>
+          <div class="note">
+            <b>28픽셀에서는 이렇게 못 봤다.</b> 그때는 "전부 안 나뉘었다"고 적었는데,
+            224픽셀로 보니 <b>나뉜 것도 안 나뉜 것도 아닌 중간</b>이다.
+            저해상도에서 중간 단계가 뭉개져 한쪽으로 보였던 것이다.
+            <br><br>
+            <b>확신도 그 자리를 가리킨다.</b> 남은 14장의 최소 확신은 0.53~0.97,
+            절반이 0.7 아래다. 저해상도 모델이 1.00 으로 단언하던 자리다.
+          </div>
+          <div class="note">
+            <b>의학적 판정은 아니다.</b> 발표자는 혈액학 전문가가 아니다. 말할 수
+            있는 것은 <b>"라벨이 반대인 두 무리를 눈으로 구분할 수 없다"</b>까지다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </article></section>
+
+  <!-- 18 한계 -->
+  <section class="stage"><article class="slide">
+    <div class="head"><span class="eyebrow">한계</span><span class="num">18</span></div>
     <div class="body">
       <h2>말할 수 없는 것을 먼저 적는다</h2>
       <div class="cols c-1-1">
@@ -1036,7 +1079,7 @@ figcaption {
 
   <!-- 15 배운 것 -->
   <section class="stage"><article class="slide">
-    <div class="head"><span class="eyebrow">배운 것</span><span class="num">18</span></div>
+    <div class="head"><span class="eyebrow">배운 것</span><span class="num">19</span></div>
     <div class="body">
       <h2>네 번 틀렸고,<br>네 번 다 <span class="hl">재서</span> 잡았다</h2>
       <div class="cols c-1-1">
@@ -1063,7 +1106,7 @@ figcaption {
               좋아지는 게 아니다.</p>
           </div>
           <p class="mono" style="font-size:1.2cqw;color:var(--muted);">
-            커밋 22 · 테스트 91 · 학습 실행 9 · 성공 기준 6/6</p>
+            커밋 23 · 테스트 97 · 학습 실행 9 · 성공 기준 6/6</p>
         </div>
       </div>
     </div>
@@ -1071,7 +1114,7 @@ figcaption {
 
   <!-- 16 마무리 -->
   <section class="stage"><article class="slide turn">
-    <div class="head"><span class="eyebrow">마무리</span><span class="num">19</span></div>
+    <div class="head"><span class="eyebrow">마무리</span><span class="num">20</span></div>
     <div class="body" style="justify-content:center;">
       <h2>"98% 맞혔습니다"는 누구나 한다.<br><span class="hl">남은 2%가 무엇인지 아는 것</span>이<br>이 프로젝트의 결과다.</h2>
       <div class="cover-meta" style="margin-top:1.5cqw;">
@@ -1083,7 +1126,7 @@ figcaption {
 </div>
 
 <nav class="rail" aria-label="슬라이드 이동">
-  <span class="count" id="count">01 / 20</span>
+  <span class="count" id="count">01 / 21</span>
   <div class="dots" id="dots"></div>
   <span class="hint">← → 또는 스크롤 · P 인쇄</span>
 </nav>
