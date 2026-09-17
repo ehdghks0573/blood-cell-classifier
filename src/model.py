@@ -47,6 +47,19 @@ def target_layer(model, arch: str = "resnet18"):
     raise ValueError(f"모르는 아키텍처: {arch}")
 
 
+def finer_layer(model, arch: str = "resnet18"):
+    """`target_layer` 보다 한 단계 앞, 공간 해상도가 두 배인 블록.
+
+    112px 입력에서 마지막 블록은 4×4 라 히트맵이 덩어리 하나로 뭉친다.
+    7×7 에서도 같은 결론이 나오는지 확인하는 용도다 (`tools/confidence_cam.py`).
+    """
+    if arch.startswith("resnet"):
+        return model.layer3[-1]
+    if arch.startswith("efficientnet"):
+        return model.features[5]
+    raise ValueError(f"모르는 아키텍처: {arch}")
+
+
 def count_parameters(model) -> tuple[int, int]:
     """(전체, 학습 대상) 파라미터 수."""
     total = sum(p.numel() for p in model.parameters())
