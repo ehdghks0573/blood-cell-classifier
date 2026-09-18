@@ -1,0 +1,843 @@
+<title>백혈구 분류 작업계획표</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700&family=Gothic+A1:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap">
+
+<style>
+  :root {
+    /* 라이트-김자 염색 이미지에서 가져온 팔레트 */
+    --nucleus:   #6B4EA8;   /* 핵의 보라 — 이 문서의 액센트 */
+    --nucleus-2: #8B6FC4;
+    --erythro:   #C2565B;   /* 적혈구의 붉은빛 — 경고·미달 */
+    --granule:   #B8862F;   /* 과립의 황갈색 — 진행 중 */
+    --verified:  #4A7C59;   /* 통과 */
+
+    --ground:   #F6F2EA;
+    --surface:  #FFFDF8;
+    --raised:   #FFFFFF;
+    --line:     #E2D9CA;
+    --hairline: #EDE6DA;
+
+    --ink:   #2A2320;
+    --ink-2: #5C5148;
+    --ink-3: #8A7F73;
+
+    --serif: "Noto Serif KR", Batang, serif;
+    --sans:  "Gothic A1", "Malgun Gothic", system-ui, sans-serif;
+    --mono:  "JetBrains Mono", Consolas, monospace;
+
+    --measure: 66ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --nucleus:   #AE8FE6;
+      --nucleus-2: #C4ABF0;
+      --erythro:   #E38A8E;
+      --granule:   #D9AC57;
+      --verified:  #7FBF92;
+
+      --ground:   #171319;
+      --surface:  #1E1A22;
+      --raised:   #262130;
+      --line:     #372F40;
+      --hairline: #2A2431;
+
+      --ink:   #EDE7F2;
+      --ink-2: #ABA1B5;
+      --ink-3: #7D7488;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --nucleus:   #AE8FE6;
+    --nucleus-2: #C4ABF0;
+    --erythro:   #E38A8E;
+    --granule:   #D9AC57;
+    --verified:  #7FBF92;
+
+    --ground:   #171319;
+    --surface:  #1E1A22;
+    --raised:   #262130;
+    --line:     #372F40;
+    --hairline: #2A2431;
+
+    --ink:   #EDE7F2;
+    --ink-2: #ABA1B5;
+    --ink-3: #7D7488;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 860px; margin: 0 auto; padding: 44px 24px 100px; }
+
+  /* ---------- 헤더 ---------- */
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--nucleus);
+    margin: 0 0 12px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(30px, 5.2vw, 44px);
+    font-weight: 700;
+    letter-spacing: -.015em;
+    line-height: 1.25;
+    text-wrap: balance;
+    margin: 0 0 14px;
+  }
+
+  .lede { max-width: var(--measure); color: var(--ink-2); margin: 0 0 22px; }
+
+  .disclaimer {
+    display: flex;
+    gap: 11px;
+    align-items: flex-start;
+    max-width: var(--measure);
+    padding: 13px 16px;
+    margin-bottom: 30px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--erythro);
+    border-radius: 2px;
+    font-size: 13.5px;
+    color: var(--ink-2);
+  }
+
+  .disclaimer b { color: var(--erythro); font-weight: 700; flex: none; }
+
+  /* ---------- 현황 ---------- */
+
+  .status {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .stat { background: var(--surface); padding: 13px 15px; }
+  .stat dt { font-size: 11px; letter-spacing: .05em; color: var(--ink-3); margin: 0 0 3px; }
+  .stat dd {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 21px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.02em;
+  }
+  .stat dd small { font-size: 12px; font-weight: 400; color: var(--ink-3); }
+
+  .meter {
+    height: 6px;
+    background: var(--line);
+    border-radius: 1px;
+    overflow: hidden;
+    margin-bottom: 44px;
+  }
+  .meter span {
+    display: block;
+    height: 100%;
+    background: var(--nucleus);
+    transition: width .35s cubic-bezier(.2,.7,.3,1);
+  }
+
+  /* ---------- 성공 기준 ---------- */
+
+  .sec-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin: 0 0 14px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .criteria { margin-bottom: 48px; }
+
+  .crit {
+    display: grid;
+    grid-template-columns: 34px 1fr auto;
+    gap: 0 14px;
+    align-items: baseline;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 14px;
+  }
+  .crit:last-child { border-bottom: none; }
+
+  .crit-id {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--nucleus);
+  }
+  .crit-goal { color: var(--ink-3); font-size: 12.5px; display: block; }
+  .crit-val {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .crit-val.pass { color: var(--verified); }
+  .crit-val.pending { color: var(--ink-3); }
+  .crit-val.partial { color: var(--granule); }
+
+  /* ---------- 주차 ---------- */
+
+  .week {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 52px 0 6px;
+    padding-bottom: 11px;
+    border-bottom: 2px solid var(--ink);
+  }
+  .week h2 {
+    font-family: var(--serif);
+    font-size: 19px;
+    font-weight: 700;
+    margin: 0;
+  }
+  .week .range {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- 일차 ---------- */
+
+  .day { padding: 24px 0; border-bottom: 1px solid var(--hairline); }
+
+  .day.is-today {
+    background: var(--raised);
+    border: 1px solid var(--nucleus);
+    border-radius: 3px;
+    padding: 22px 22px 24px;
+    margin: 12px 0;
+  }
+
+  .day-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 12px;
+    margin-bottom: 3px;
+  }
+
+  .day-no {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    color: var(--ink-3);
+    flex: none;
+  }
+  .day.is-today .day-no { color: var(--nucleus); }
+  .day.is-done .day-title { color: var(--ink-3); }
+
+  .day-title {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -.01em;
+  }
+
+  .date {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+  }
+  .hours {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-3);
+    font-variant-numeric: tabular-nums;
+    margin-left: auto;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 2px;
+    border: 1px solid currentColor;
+    flex: none;
+  }
+  .tag.done { color: var(--verified); }
+  .tag.key  { color: var(--erythro); }
+  .tag.buf  { color: var(--granule); }
+
+  .note { max-width: var(--measure); font-size: 13.5px; color: var(--ink-2); margin: 6px 0 14px; }
+
+  /* 실제로 나온 결과를 계획 옆에 붙인다 — 계획과 결과가 다른 곳에 있으면
+     둘 중 하나는 반드시 낡는다. */
+  .outcome {
+    max-width: var(--measure);
+    font-size: 13px;
+    color: var(--ink-2);
+    margin: -6px 0 14px;
+    padding: 9px 13px;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--verified);
+    border-radius: 0 2px 2px 0;
+  }
+  .outcome b {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--verified);
+    margin-right: 7px;
+  }
+
+  .tasks { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 1px; }
+  .tasks li { display: flex; }
+  .tasks label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 3px 0;
+    cursor: pointer;
+    font-size: 14px;
+    max-width: var(--measure);
+  }
+  .tasks input {
+    appearance: none;
+    width: 15px; height: 15px;
+    margin: 5px 0 0;
+    flex: none;
+    border: 1.5px solid var(--line);
+    border-radius: 2px;
+    background: var(--surface);
+    cursor: pointer;
+    display: grid;
+    place-content: center;
+    transition: background .12s, border-color .12s;
+  }
+  .tasks input::after {
+    content: "";
+    width: 8px; height: 4.5px;
+    border-left: 2px solid var(--surface);
+    border-bottom: 2px solid var(--surface);
+    transform: rotate(-45deg) translate(1px, -1px);
+    opacity: 0;
+  }
+  .tasks input:checked { background: var(--nucleus); border-color: var(--nucleus); }
+  .tasks input:checked::after { opacity: 1; }
+  .tasks input:focus-visible { outline: 2px solid var(--nucleus); outline-offset: 2px; }
+  .tasks input:checked + span { color: var(--ink-3); text-decoration: line-through; text-decoration-color: var(--line); }
+
+  .day-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 18px;
+    align-items: baseline;
+    max-width: var(--measure);
+    font-size: 12.5px;
+    color: var(--ink-2);
+  }
+  .day-foot .lbl {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-right: 6px;
+  }
+  .advances { display: flex; gap: 5px; }
+  .advances i {
+    font-family: var(--mono);
+    font-style: normal;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--nucleus);
+    border: 1px solid var(--nucleus);
+    border-radius: 2px;
+    padding: 0 5px;
+  }
+
+  /* ---------- 우선순위 ---------- */
+
+  .fallback {
+    margin-top: 56px;
+    padding: 24px 26px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--granule);
+    border-radius: 2px;
+  }
+  .fallback h3 { font-family: var(--serif); font-size: 17px; margin: 0 0 8px; }
+  .fallback p { font-size: 13.5px; color: var(--ink-2); margin: 0 0 16px; max-width: var(--measure); }
+  .fallback ol { margin: 0; padding-left: 20px; font-size: 13.5px; display: flex; flex-direction: column; gap: 6px; }
+  .fallback ol span { color: var(--ink-3); }
+
+  .save-note { margin-top: 30px; font-family: var(--mono); font-size: 11px; color: var(--ink-3); }
+
+  @media (max-width: 560px) {
+    .wrap { padding: 30px 16px 76px; }
+    .hours { margin-left: 0; }
+    .crit { grid-template-columns: 30px 1fr; }
+    .crit-val { grid-column: 2; }
+  }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<script id="state" type="application/json">{"done":{"d1t0":true,"d1t1":true,"d1t2":true,"d1t3":true,"d1t4":true,"d1t5":true,"d2t0":true,"d2t1":true,"d2t2":true,"d2t3":true,"d3t0":true,"d3t1":true,"d3t2":true,"d3t3":true,"d4t0":true,"d4t1":true,"d4t2":true,"d4t3":true,"d5t0":true,"d5t1":true,"d5t2":true,"d5t3":true,"d5t4":true,"d6t0":true,"d6t1":true,"d6t2":true,"d6t3":true,"d7t0":true,"d7t1":true,"d7t2":true,"d7t3":true,"d8t0":true,"d8t1":true,"d8t2":true,"d8t3":true,"d9t0":true,"d9t1":true,"d9t2":true,"d9t3":true,"d10t0":true,"d10t1":true,"d10t2":true,"d10t3":true,"d11t0":true,"d11t1":true,"d11t2":true,"d11t3":true,"d12t0":true,"d12t1":true,"d12t2":true,"d12t3":true,"d12t4":true,"d13t0":true,"d13t1":true,"d13t2":true,"d13t3":true,"d13t4":true,"d14t0":true,"d14t1":true,"d14t2":true,"d14t3":true,"d14t4":true}}</script>
+
+<div class="wrap" id="app"></div>
+
+<script>
+  var PRISTINE = document.documentElement.outerHTML;
+
+  var PLAN = {
+    start: "2026-09-09",
+    criteria: [
+      ["S1", "분류 성능", "test macro F1 ≥ 0.96", "0.9898 (224px + EffB0) · 28px 0.9791", "pass"],
+      ["S2", "클래스별 성능", "최저 클래스 F1 ≥ 0.90", "0.9760 (미성숙 과립구, 224px EffB0)", "pass"],
+      ["S3", "재현성", "같은 시드 두 번, 차이 < 0.01", "0.0000 · ResNet18 은 다른 GPU 에서도 일치", "pass"],
+      ["S4", "설명가능성", "8클래스 Grad-CAM 생성", "8클래스 히트맵 · 대조군으로 해석 범위 확정", "pass"],
+      ["S5", "오류 분석", "혼동 상위 3쌍 원인 서술", "공통 오분류 26장 → 14장 · 구조 바꿔도 같은 선", "pass"],
+      ["S6", "학습 시간", "1회 30분 이내", "9.1분 (224px ResNet18 · 112px 입력)", "pass"]
+    ],
+    weeks: [
+      { title: "1주차 — 결과를 확정하고 설명한다", range: "09/09 – 09/15", days: [1,2,3,4,5,6,7] },
+      { title: "2주차 — 비교 실험과 마무리", range: "09/16 – 09/22", days: [8,9,10,11,12,13,14] }
+    ],
+    days: [
+      {
+        n: 1, date: "09/09", dow: "수", title: "환경·데이터·파이프라인·베이스라인", hours: null, tag: "done",
+        note: "주제를 바꾼 첫날에 예상보다 많이 나갔다. 웹캠 부재로 막혔던 경험 때문에 하드웨어부터 검증했고, 그게 맞았다 — GTX 1050 Ti 는 Pascal 세대라 최신 PyTorch 가 지원을 끊었을 수 있었는데 실제로 돌려서 확인했다.",
+        tasks: [
+          "GPU 실동작 검증 (conv + backward, 219ms/스텝)",
+          "BloodMNIST 확보 — Zenodo 차단으로 HuggingFace 미러 우회",
+          "데이터 파이프라인 + 도메인에 맞춘 증강",
+          "전이학습 학습 루프 + 실행 기록",
+          "평가 지표 (macro F1 중심) + evaluate.py",
+          "Grad-CAM 구현 + 정오답 비교 시각화"
+        ],
+        verify: "테스트 29개 통과, 3에폭 test macro F1 0.9601",
+        advances: ["S1","S2","S4","S6"]
+      },
+      {
+        n: 2, date: "09/10", dow: "목", title: "베이스라인 확정과 재현성", hours: 2, tag: "key",
+        note: "성능 숫자를 확정하는 날. 20에폭 학습이 수렴한 값이 이 프로젝트의 기준선이 된다. 그리고 같은 시드로 두 번 돌려 결과가 재현되는지 확인해야, 이후 실험 비교가 의미를 갖는다.",
+        outcome: "두 번 돌린 값이 0.974868057672553 으로 소수점 15자리까지 같았다. 09-17·09-18 에 세대가 다른 GPU(GTX 960)에서 시드·입력·원본 해상도를 바꿔 가며 네 번 더 확인했는데 ResNet18 은 네 번 다 같았다. 다만 EfficientNet-B0 은 0.9791 → 0.9677 로 어긋난다 — 재현이 보장되는 범위는 구조를 탄다.",
+        tasks: [
+          "20에폭 본 학습 완료 후 최종 지표 확정",
+          "같은 시드로 재실행 → macro F1 차이 확인 (S3)",
+          "혼동행렬 이미지 확인",
+          "docs/experiments.md 실험 기록 시작"
+        ],
+        verify: "두 실행의 macro F1 차이 < 0.01",
+        advances: ["S1","S2","S3"]
+      },
+      {
+        n: 3, date: "09/11", dow: "금", title: "결과 문서화", hours: 2, tag: null,
+        note: "숫자를 표로 만들고 해석을 붙인다. 여기서 정리해 두면 마지막 주에 발표 자료를 만들 때 그대로 옮기면 된다.",
+        tasks: [
+          "docs/results.md — 지표, 혼동행렬, 클래스별 성능",
+          "학습 곡선에서 과적합 시작 지점 확인",
+          "가장 잘 맞히는 클래스와 못 맞히는 클래스의 차이 서술",
+          "정확도와 macro F1 의 차이를 실제 수치로 보여주기"
+        ],
+        verify: "docs/results.md 초안 완성",
+        advances: ["S1","S2"]
+      },
+      {
+        n: 4, date: "09/12", dow: "토", title: "Grad-CAM 심화", hours: 2.5, tag: null,
+        note: "구현은 끝났으니 이제 읽는 단계다. 8클래스 각각에서 모델이 무엇을 보는지 확인한다. 세포 핵을 보는지, 세포질을 보는지, 아니면 배경을 보는지.",
+        outcome: "확신이 높은 묶음과 낮은 묶음의 히트맵 위치는 갈리지 않았다 — 망설임은 보는 자리에서 오지 않는다. 그런데 대조군을 세우자 처음 쓴 문장이 과했다는 것도 드러났다. 히트맵이 실제 세포 마스크보다 같은 면적의 정중앙 원에 더 많이 얹힌다. 112px 입력의 Grad-CAM 은 4×4 라 세포 모양을 따라갈 해상도가 없어서, \"세포를 본다\"가 아니라 \"가운데를 본다\"까지만 말한다.",
+        tasks: [
+          "8클래스 대표 히트맵 생성 및 검토 (S4)",
+          "클래스마다 모델이 주목하는 부위 서술",
+          "확신이 높은 예측 vs 낮은 예측의 히트맵 비교",
+          "배경을 보고 있는 사례 수집"
+        ],
+        verify: "S4 달성, 클래스별 주목 부위 기록",
+        advances: ["S4"]
+      },
+      {
+        n: 5, date: "09/13", dow: "일", title: "오류 분석 — 미성숙 과립구", hours: 3, tag: "key",
+        note: "베이스라인에서 이미 단서가 나왔다. 미성숙 과립구가 거의 모든 혼동의 중심에 있고, 특히 호중구와 가장 많이 헷갈린다. 생물학적으로 미성숙 과립구는 성숙하면 호중구가 되는 중간 단계라, 둘은 별개 범주가 아니라 연속선상에 있다. 모델의 결함이 아니라 라벨 자체의 모호성일 수 있다.",
+        tasks: [
+          "혼동 상위 3쌍의 실제 오분류 이미지 수집",
+          "미성숙 과립구 ↔ 호중구 경계 사례 관찰",
+          "Grad-CAM 으로 오분류 근거 확인",
+          "형태 유사성 / 데이터 부족 / 라벨 모호성 중 원인 판별",
+          "docs/results.md 오류 분석 절 작성 (S5)"
+        ],
+        verify: "S5 달성 — 상위 3쌍 각각에 원인 서술",
+        advances: ["S5"]
+      },
+      {
+        n: 6, date: "09/14", dow: "월", title: "예비일 · 해상도 비교", hours: 2, tag: "buf",
+        note: "현재 28px 로 학습 중이다. 224px 파일을 구하면 해상도가 성능에 미치는 영향을 비교할 수 있고, 그 자체로 좋은 실험 항목이 된다. 못 구하면 저해상도의 한계를 한계 항목으로 정리한다.",
+        tasks: [
+          "224px 데이터 확보 시도",
+          "확보되면 동일 조건으로 학습해 비교",
+          "밀린 작업 처리",
+          "예비 시간 — 여기까지 순조로우면 쉬어도 된다"
+        ],
+        verify: "해상도 비교 결과 또는 한계 기록",
+        advances: ["S1"]
+      },
+      {
+        n: 7, date: "09/15", dow: "화", title: "중간 점검", hours: 2, tag: null,
+        note: "여기까지의 속도를 보고 2주차를 조정한다. 성능은 이미 충분하므로, 남는 시간은 비교 실험보다 분석 깊이에 쓰는 편이 낫다.",
+        tasks: [
+          "S1~S5 통과 여부 확인",
+          "docs/results.md 중간 정리",
+          "남은 일정 재조정",
+          "발표에서 쓸 그림 후보 선별"
+        ],
+        verify: "S1~S5 현황 확정",
+        advances: []
+      },
+      {
+        n: 8, date: "09/16", dow: "수", title: "모델 비교 실험", hours: 2.5, tag: null,
+        note: "ResNet18 이 유일한 선택이 아님을 보인다. VRAM 사용이 0.82GB 뿐이라 더 큰 모델도 들어간다. 다만 성능 차이가 작다면 그 사실 자체가 결과다 — 무거운 모델이 항상 낫지는 않다.",
+        outcome: "무거운 쪽이 낫지 않았다. ResNet50 은 0.9738 로 ResNet18(0.9749)보다 낮으면서 학습은 10배(120.8분) 걸린다. 사전학습을 빼면 0.9749 → 0.9612 로 떨어지는데, 무너지는 축이 호염기구 ↔ 미성숙 과립구다 — 사전학습이 주던 것은 질감 필터다. 다만 그 모델은 덜 수렴했으므로 \"20에폭 안에 0.014 를 번다\"까지만 말한다.",
+        tasks: [
+          "ResNet50 학습 및 비교",
+          "EfficientNet-B0 학습 및 비교",
+          "사전학습 없이(--no-pretrained) 학습해 전이학습 효과 측정",
+          "docs/experiments.md 에 비교표 정리"
+        ],
+        verify: "3개 이상 모델의 비교표",
+        advances: ["S1"]
+      },
+      {
+        n: 9, date: "09/17", dow: "목", title: "클래스 불균형 실험", hours: 2, tag: null,
+        note: "이 데이터는 최다/최소 2.7배 차이다. 아주 심하지는 않아 가중치가 필요 없을 수도 있는데, 있고 없고를 비교해 수치로 보이는 것이 이 프로젝트의 목적에 맞다.",
+        outcome: "쓰지 않기로 했다. 드문 클래스의 재현율은 올랐지만 정밀도를 내주어서, 전체 오답은 83 → 85 로 늘고 macro F1 은 0.0016 낮다. 림프구는 재현율이 0.996 까지 갔는데 F1 은 0.0116 떨어졌다. 불균형이 2.7배로 약해 보정할 것이 없고, 남은 오류는 빈도가 아니라 경계에서 나온다 — 혼동 상위 3쌍이 거의 그대로다.",
+        tasks: [
+          "--class-weights 유무 비교 학습",
+          "최저 클래스 F1 변화 확인",
+          "macro F1 과 accuracy 가 각각 어떻게 움직이는지 관찰",
+          "결론을 실험 기록에 남기기"
+        ],
+        verify: "가중치 유무 비교 결과",
+        advances: ["S2"]
+      },
+      {
+        n: 10, date: "09/18", dow: "금", title: "라벨 모호성 조사", hours: 2.5, tag: "key",
+        note: "이 프로젝트에서 가장 흥미로운 부분이 될 수 있다. 미성숙 과립구와 호중구가 연속선상에 있다면, 모델이 틀린 것이 아니라 정답 자체가 애매한 것이다. 그렇다면 성능의 상한이 어디인지도 함께 이야기할 수 있다.",
+        outcome: "여기서 이 프로젝트의 결론이 나왔다. 독립적으로 학습한 다섯 모델이 같은 26장을 확신에 차서 틀린다(우연이라면 0.00장). 원본을 224px 로 올리자 12장은 풀리고 14장이 남는데, 풀린 쪽은 전부 과립·질감 축이고 남은 쪽은 거의 다 핵의 분엽 축이다. 09-18 에 구조만 EfficientNet-B0 으로 바꿔 다시 재도 29장 중 26장에서 판정이 같았다 — 이 선을 긋는 것은 구조가 아니라 데이터의 해상도다. 가장 좋은 모델(0.9898)조차 그 12장은 못 맞힌다.",
+        tasks: [
+          "미성숙 과립구로 라벨된 이미지와 호중구 이미지를 나란히 비교",
+          "사람이 봐도 구분이 어려운 사례 수집",
+          "모델의 확신도(확률)가 낮은 사례와 겹치는지 확인",
+          "성능 상한에 대한 서술 작성"
+        ],
+        verify: "라벨 모호성 사례와 해석 기록",
+        advances: ["S5"]
+      },
+      {
+        n: 11, date: "09/19", dow: "토", title: "전체 재현 검증", hours: 3, tag: null,
+        note: "다른 사람이 재현할 수 있어야 결과다. 명령 한 줄로 학습부터 평가·설명까지 돌아가는지 확인한다.",
+        tasks: [
+          "tools/run_all.ps1 작성",
+          "깨끗한 상태에서 처음부터 끝까지 실행",
+          "최종 지표 확정 기록",
+          "README 실행 절차 검증"
+        ],
+        verify: "명령 한 줄로 전체 파이프라인 재현",
+        advances: ["S3"]
+      },
+      {
+        n: 12, date: "09/20", dow: "일", title: "예외 처리", hours: 2, tag: null,
+        note: "기능이 아니라 안 죽게 만드는 날.",
+        tasks: [
+          "데이터가 없을 때 안내 후 정상 종료",
+          "GPU 없을 때 CPU 자동 전환",
+          "체크포인트 없이 evaluate/explain 실행",
+          "VRAM 부족 시 배치 크기 안내",
+          "잘못된 인자 처리"
+        ],
+        verify: "크래시 0회",
+        advances: []
+      },
+      {
+        n: 13, date: "09/21", dow: "월", title: "README 와 문서 정리", hours: 2.5, tag: null,
+        note: "임상 사용 불가 명시를 빠뜨리지 않는다. 의료 AI 에서 이 구분을 명확히 하는 것은 감점이 아니라 도메인을 이해했다는 신호다.",
+        tasks: [
+          "README — 설치·실행·구조·결과",
+          "한계와 임상 사용 불가 명시",
+          "결과 이미지 정리 (혼동행렬, 히트맵)",
+          "실험 비교표 최종 정리",
+          "최종 커밋"
+        ],
+        verify: "README 완성",
+        advances: []
+      },
+      {
+        n: 14, date: "09/22", dow: "화", title: "발표 자료", hours: 3, tag: "key",
+        note: "핵심은 6번과 7번 슬라이드다. \"ResNet 으로 분류했습니다\"는 누구나 한다. \"미성숙 과립구와 호중구는 연속선상에 있어서 라벨 자체가 애매하고, Grad-CAM 으로 확인해 보니 모델도 같은 지점에서 헷갈린다\"가 이 프로젝트만의 이야기다.",
+        outcome: "9장으로 잡았던 것이 22장이 됐다. 오류 분석에서 나온 이야기가 계획보다 길어져서다 — 공통 오분류 26장, 해상도로 갈린 12장과 14장, 구조를 바꿔도 같은 선. 09-18 에 Grad-CAM 장의 문구를 측정이 지지하는 범위로 좁히고 구조 교차검증 한 장을 더했다.",
+        tasks: [
+          "슬라이드 9장 구성",
+          "6번: Grad-CAM — 모델은 어디를 보는가",
+          "7번: 오류 분석 — 왜 헷갈리는가",
+          "정확도가 아니라 macro F1 을 쓴 이유 정리",
+          "한계와 확장 방향"
+        ],
+        verify: "발표 슬라이드 22장",
+        advances: []
+      }
+    ]
+  };
+
+  var state = JSON.parse(document.getElementById("state").textContent);
+  if (!state.done) state.done = {};
+
+  var LOCAL_KEY = "bcc-plan-v1";
+  var artifactApi = null, canPublish = false, saveTimer = null;
+
+  try {
+    var local = localStorage.getItem(LOCAL_KEY);
+    if (local) {
+      var parsed = JSON.parse(local);
+      if (parsed && parsed.done) Object.assign(state.done, parsed.done);
+    }
+  } catch (e) {}
+
+  function taskId(d, i) { return "d" + d.n + "t" + i; }
+
+  function dayDone(d) {
+    for (var i = 0; i < d.tasks.length; i++) if (!state.done[taskId(d, i)]) return false;
+    return true;
+  }
+
+  function todayIndex() {
+    var start = new Date(PLAN.start + "T00:00:00");
+    var now = new Date();
+    now = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.round((now - start) / 86400000) + 1;
+  }
+
+  function el(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function render() {
+    var app = document.getElementById("app");
+    app.textContent = "";
+    var today = todayIndex();
+
+    var totalTasks = 0, doneTasks = 0, doneDays = 0, remainHours = 0;
+    PLAN.days.forEach(function (d) {
+      totalTasks += d.tasks.length;
+      d.tasks.forEach(function (_, i) { if (state.done[taskId(d, i)]) doneTasks++; });
+      if (dayDone(d)) doneDays++;
+      else if (d.hours) remainHours += d.hours;
+    });
+
+    app.appendChild(el("p", "eyebrow", "2주 개인 프로젝트 · 작업계획표"));
+    app.appendChild(el("h1", null, "백혈구 8종 분류와 판단 근거"));
+    app.appendChild(el("p", "lede",
+      "현미경 혈액 도말 이미지를 8종의 백혈구로 분류하고, 모델이 이미지의 어디를 보고 " +
+      "그렇게 판단했는지 Grad-CAM 히트맵으로 확인한다. BloodMNIST 17,092장."));
+
+    var dis = el("div", "disclaimer");
+    dis.appendChild(el("b", null, "교육 목적"));
+    dis.appendChild(el("span", null,
+      "이 모델은 임상 진단에 사용할 수 없다. 단일 공개 데이터셋으로 학습했고 임상 검증을 " +
+      "거치지 않았다. 의료 AI 에서 이 구분을 명확히 하는 것까지가 결과물의 일부다."));
+    app.appendChild(dis);
+
+    var stats = el("dl", "status");
+    [["진행", doneDays + "<small>/14일</small>"],
+     ["작업", doneTasks + "<small>/" + totalTasks + "</small>"],
+     ["남은 시간", remainHours.toFixed(1) + "<small>h</small>"],
+     ["오늘", (today >= 1 && today <= 14) ? "Day " + today : "—"]
+    ].forEach(function (p) {
+      var s = el("div", "stat");
+      s.appendChild(el("dt", null, p[0]));
+      var dd = el("dd"); dd.innerHTML = p[1];
+      s.appendChild(dd);
+      stats.appendChild(s);
+    });
+    app.appendChild(stats);
+
+    var meter = el("div", "meter");
+    var fill = el("span");
+    fill.style.width = (totalTasks ? doneTasks / totalTasks * 100 : 0).toFixed(1) + "%";
+    meter.appendChild(fill);
+    app.appendChild(meter);
+
+    var crit = el("section", "criteria");
+    crit.appendChild(el("h2", "sec-label", "성공 기준 — 현재 값"));
+    PLAN.criteria.forEach(function (c) {
+      var row = el("div", "crit");
+      row.appendChild(el("span", "crit-id", c[0]));
+      var mid = el("span");
+      mid.appendChild(document.createTextNode(c[1]));
+      mid.appendChild(el("span", "crit-goal", c[2]));
+      row.appendChild(mid);
+      row.appendChild(el("span", "crit-val " + c[4], c[3]));
+      crit.appendChild(row);
+    });
+    app.appendChild(crit);
+
+    PLAN.weeks.forEach(function (w) {
+      var head = el("div", "week");
+      head.appendChild(el("h2", null, w.title));
+      head.appendChild(el("span", "range", w.range));
+      app.appendChild(head);
+      w.days.forEach(function (n) { app.appendChild(renderDay(PLAN.days[n - 1], today)); });
+    });
+
+    var fb = el("aside", "fallback");
+    fb.appendChild(el("h3", null, "일정이 밀렸을 때 지킬 순서"));
+    fb.appendChild(el("p", null,
+      "성능 숫자를 0.01 올리는 것보다 결과를 제대로 분석하고 설명하는 쪽이 낫다. " +
+      "macro F1 0.96 과 0.97 의 차이는 아무도 신경 쓰지 않지만, 모델이 왜 틀리는지는 모두가 궁금해한다."));
+    var ol = el("ol");
+    [["재현 가능한 학습·평가 파이프라인", "이것만 돼도 프로젝트는 성립한다"],
+     ["혼동행렬과 클래스별 지표", null],
+     ["Grad-CAM 히트맵", null],
+     ["오류 분석과 라벨 모호성", null],
+     ["모델 비교 실험", null]
+    ].forEach(function (it) {
+      var li = el("li");
+      li.appendChild(document.createTextNode(it[0]));
+      if (it[1]) li.appendChild(el("span", null, " — " + it[1]));
+      ol.appendChild(li);
+    });
+    fb.appendChild(ol);
+    app.appendChild(fb);
+
+    var note = el("p", "save-note");
+    note.id = "save-note";
+    note.textContent = canPublish ? "체크한 상태는 자동 저장됩니다."
+                                  : "체크한 상태는 이 브라우저에 저장됩니다.";
+    app.appendChild(note);
+  }
+
+  function renderDay(d, today) {
+    var done = dayDone(d), isToday = d.n === today;
+    var wrap = el("article", "day" + (done ? " is-done" : "") + (isToday ? " is-today" : ""));
+
+    var head = el("div", "day-head");
+    head.appendChild(el("span", "day-no", "DAY " + String(d.n).padStart(2, "0")));
+    head.appendChild(el("h3", "day-title", d.title));
+    head.appendChild(el("span", "date", d.date + " (" + d.dow + ")"));
+    if (d.tag === "done") head.appendChild(el("span", "tag done", "완료"));
+    if (d.tag === "key") head.appendChild(el("span", "tag key", "핵심"));
+    if (d.tag === "buf") head.appendChild(el("span", "tag buf", "버퍼"));
+    if (d.hours) head.appendChild(el("span", "hours", d.hours.toFixed(1) + "h"));
+    wrap.appendChild(head);
+
+    if (d.note) wrap.appendChild(el("p", "note", d.note));
+
+    if (d.outcome) {
+      var oc = el("p", "outcome");
+      oc.appendChild(el("b", null, "결과"));
+      oc.appendChild(document.createTextNode(d.outcome));
+      wrap.appendChild(oc);
+    }
+
+    var list = el("ul", "tasks");
+    d.tasks.forEach(function (t, i) {
+      var id = taskId(d, i);
+      var li = el("li"), label = el("label");
+      var box = document.createElement("input");
+      box.type = "checkbox";
+      box.checked = !!state.done[id];
+      box.addEventListener("change", function () {
+        if (box.checked) state.done[id] = true; else delete state.done[id];
+        persist();
+        render();
+      });
+      label.appendChild(box);
+      label.appendChild(el("span", null, t));
+      li.appendChild(label);
+      list.appendChild(li);
+    });
+    wrap.appendChild(list);
+
+    var foot = el("div", "day-foot");
+    if (d.verify) {
+      var v = el("span");
+      v.appendChild(el("span", "lbl", "검증"));
+      v.appendChild(document.createTextNode(d.verify));
+      foot.appendChild(v);
+    }
+    if (d.advances && d.advances.length) {
+      var a = el("span");
+      a.appendChild(el("span", "lbl", "진전"));
+      var chips = el("span", "advances");
+      d.advances.forEach(function (s) { chips.appendChild(el("i", null, s)); });
+      a.appendChild(chips);
+      foot.appendChild(a);
+    }
+    if (foot.childNodes.length) wrap.appendChild(foot);
+
+    return wrap;
+  }
+
+  function persist() {
+    try { localStorage.setItem(LOCAL_KEY, JSON.stringify({ done: state.done })); } catch (e) {}
+    if (!canPublish) return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(publish, 900);
+  }
+
+  function publish() {
+    if (!artifactApi) return;
+    var html = PRISTINE.replace(
+      /(<script id="state" type="application\/json">)[\s\S]*?(<\/script>)/,
+      function (m, open, close) { return open + JSON.stringify({ done: state.done }) + close; }
+    );
+    artifactApi.publish("<!DOCTYPE html>\n" + html).catch(function () {});
+  }
+
+  render();
+
+  if (window.claude && window.claude.use) {
+    window.claude.use("artifact").then(function (api) {
+      if (!api) return;
+      artifactApi = api;
+      canPublish = true;
+      var n = document.getElementById("save-note");
+      if (n) n.textContent = "체크한 상태는 자동 저장됩니다.";
+    }).catch(function () {});
+  }
+</script>
