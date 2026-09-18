@@ -1023,9 +1023,9 @@ figcaption {
       <h2>구조를 바꿔도 <span class="hl">같은 장이</span> 남는다</h2>
       <div class="cols c-5-7">
         <div class="body">
-          <span class="giant">26</span>
-          <p class="lede">기준 <strong class="mono">29장</strong> 중 두 구조의
-            <strong>판정이 같았던 장</strong>. 엇갈린 것은 3장뿐이다.</p>
+          <span class="giant">23</span>
+          <p class="lede">기준 <strong class="mono">29장</strong> 중 <strong>네 실행의
+            판정이 모두 같았던 장</strong>. 갈린 것은 6장이다.</p>
           <div class="plain">
             <span class="tag">앞 장에 남아 있던 반론</span>
             <p>고해상도로 다시 학습한 모델이 <strong>ResNet18 하나뿐</strong>이었다.
@@ -1033,41 +1033,44 @@ figcaption {
               수 있다.</p>
           </div>
           <div class="note">
-            <b>구조 하나만 바꿨다.</b> 원본 해상도(224픽셀)도 입력 크기(112픽셀)도
-            시드(42)도 그대로 두고 EfficientNet-B0 으로 다시 학습해, 같은 기준
-            29장에 여섯 번째 모델로 넣었다.
+            <b>구조와 시드를 각각 바꿨다.</b> 원본 해상도(224픽셀)와 입력 크기(112픽셀)는
+            두고, <b>구조 둘 × 시드 둘</b>로 네 번 학습해 같은 기준 29장에
+            여섯 번째 모델로 하나씩 넣었다.
           </div>
         </div>
         <div class="body">
           <table class="tbl">
-            <thead><tr><th>고해상도 모델</th><th class="n">남음</th><th class="n">되찾음</th></tr></thead>
+            <thead><tr><th>여섯 번째로 넣은 모델</th><th class="n">남음</th><th class="n">되찾음</th></tr></thead>
             <tbody>
-              <tr><td class="name">ResNet18</td><td class="n">13</td><td class="n">16</td></tr>
-              <tr><td class="name">EfficientNet-B0</td><td class="n">14</td><td class="n">15</td></tr>
-              <tr class="mark"><td class="name">둘 다 같은 판정</td><td class="n">12</td><td class="n">14</td></tr>
+              <tr><td class="name">ResNet18 · 시드 42</td><td class="n">13</td><td class="n">16</td></tr>
+              <tr><td class="name">ResNet18 · 시드 43</td><td class="n">13</td><td class="n">16</td></tr>
+              <tr><td class="name">EfficientNet-B0 · 시드 42</td><td class="n">14</td><td class="n">15</td></tr>
+              <tr><td class="name">EfficientNet-B0 · 시드 43</td><td class="n">14</td><td class="n">15</td></tr>
+              <tr class="mark"><td class="name">네 실행 전부 같은 판정</td><td class="n">10</td><td class="n">13</td></tr>
             </tbody>
           </table>
           <table class="tbl">
-            <thead><tr><th>헷갈린 축</th><th class="n">둘 다 남김</th><th class="n">둘 다 되찾음</th></tr></thead>
+            <thead><tr><th>헷갈린 축</th><th class="n">넷 다 남김</th><th class="n">넷 다 되찾음</th></tr></thead>
             <tbody>
-              <tr class="mark"><td class="name">핵의 분엽 여부</td><td class="n">9</td><td class="n">0</td></tr>
-              <tr class="mark"><td class="name">과립·세포질 질감</td><td class="n">0</td><td class="n">13</td></tr>
+              <tr class="mark"><td class="name">핵의 분엽 여부</td><td class="n">7</td><td class="n">0</td></tr>
+              <tr class="mark"><td class="name">과립·세포질 질감</td><td class="n">0</td><td class="n">12</td></tr>
               <tr><td class="name">그 밖</td><td class="n">3</td><td class="n">1</td></tr>
             </tbody>
           </table>
           <div class="note">
-            <b>0 과 0 이 핵심이다.</b> 분엽 축은 구조를 바꿔도 <b>한 장도 되찾지
-            못했고</b>, 질감 축은 구조를 바꿔도 <b>한 장도 남지 않았다.</b>
-            앞 장의 11 : 0 / 0 : 10 이 다른 구조에서 9 : 0 / 0 : 13 으로 다시 나온다.
+            <b>0 과 0 이 핵심이다.</b> 분엽 축은 구조를 바꿔도 시드를 바꿔도
+            <b>한 장도 되찾지 못했고</b>, 질감 축은 <b>한 장도 남지 않았다.</b>
+            앞 장의 11 : 0 / 0 : 10 이 네 실행에서 7 : 0 / 0 : 12 로 다시 나온다.
             <br><br>
-            <b>그래서 앞 장의 결론은 데이터의 성질이다.</b> 어느 구조로 재도
+            <b>그래서 앞 장의 결론은 데이터의 성질이다.</b> 무엇으로 재도
             28픽셀이 지우는 단서와 지우지 않는 단서에서 갈린다.
           </div>
         </div>
       </div>
-      <p class="lede">덧붙여, 이 EfficientNet-B0 은 macro F1 <strong class="mono">0.9898</strong>
-        (오답 38장)으로 <strong>이 프로젝트에서 가장 좋은 모델</strong>이다.
-        그런데도 그 12장은 못 맞힌다 — <strong>성능으로 넘는 벽이 아니다.</strong></p>
+      <p class="lede">가장 좋은 실행은 macro F1 <strong class="mono">0.9913</strong>
+        (오답 34장) — 28픽셀 기준선(83장)의 <strong>절반 이하</strong>다.
+        그런데도 그 10장은 못 맞힌다 — <strong>성능으로 넘는 벽이 아니다.</strong>
+        <span style="color:var(--muted)">(네 실행의 차이는 시드 흔들림 안에 들어가, 구조의 우열은 말하지 않는다.)</span></p>
     </div>
   </article></section>
 
