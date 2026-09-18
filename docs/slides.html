@@ -681,11 +681,14 @@ figcaption {
             <p>모델이 "호중구"라고 답할 때, <strong>이미지의 어느 픽셀이 그 답을 밀어올렸는지</strong>
               거꾸로 계산해 색으로 칠한 것이다.</p>
           </div>
-          <p class="lede">최종 모델은 <strong>틀릴 때조차 세포(주로 핵)</strong>를 보고 있다.
-            배경이나 가장자리를 보고 찍은 사례는 찾기 어렵다.</p>
+          <p class="lede">히트맵은 <strong>세포가 놓인 가운데</strong>에 모인다.
+            틀린 장에서도 배경이나 가장자리로 새는 사례는 찾기 어렵다.</p>
           <div class="note">
-            <b>3에폭 모델은 달랐다.</b> 히트맵이 세포를 벗어나 배경과 오른쪽 가장자리로 번져
-            있었다. 모델은 <b>"어디를 봐야 하는지"를 먼저 배운다.</b>
+            <b>그런데 "세포를 본다"고는 말할 수 없다.</b> 히트맵 질량이 세포 마스크(면적 30%)에
+            얹히는 비율은 0.47~0.58 인데, <b>같은 면적의 정중앙 원이 늘 더 높다</b>(0.51~0.68).
+            112px 입력의 Grad-CAM 은 4×4 라 세포 모양을 따라갈 해상도가 없다. 여기서 말할 수
+            있는 것은 <b>"가운데를 본다"</b>까지다 — 3에폭 모델은 그조차 아니어서 배경과
+            오른쪽 가장자리로 번져 있었다.
           </div>
         </div>
       </div>
@@ -696,7 +699,7 @@ figcaption {
   <section class="stage"><article class="slide turn">
     <div class="head"><span class="eyebrow">여기서부터가 본론</span><span class="num">10</span></div>
     <div class="body" style="justify-content:center;">
-      <h2>모델이 세포를 제대로 보는데도<br>틀린다면, <span class="hl">왜 틀리는 걸까</span></h2>
+      <h2>모델이 엉뚱한 데를 보는 게 아니라면,<br><span class="hl">왜 틀리는 걸까</span></h2>
       <p class="lede">남은 83장을 세 가지 방법으로 따라갔다 —
         <strong>어디서 틀리는지</strong>, <strong>왜 하필 거기인지</strong>,
         <strong>모델을 바꿔도 그대로인지</strong>.</p>
