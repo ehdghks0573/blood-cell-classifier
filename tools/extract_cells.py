@@ -84,7 +84,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     device = torch.device("cuda" if torch.cuda.is_available() and not args.cpu else "cpu")
-    ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
+    ckpt = torch.load(ckpt_path, map_location=device, weights_only=True)
     model = build_model(ckpt["arch"], NUM_CLASSES, pretrained=False).to(device)
     model.load_state_dict(ckpt["model"])
 

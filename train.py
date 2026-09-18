@@ -142,7 +142,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"\n학습 완료: {elapsed / 60:.1f}분, 최고 val macro F1 {best_f1:.4f} (에폭 {best_epoch})")
 
     # 최고 성능 지점으로 되돌린 뒤 test 로 최종 평가
-    model.load_state_dict(torch.load(run_dir / "best.pt", map_location=device)["model"])
+    model.load_state_dict(torch.load(run_dir / "best.pt", map_location=device, weights_only=True)["model"])
     y_true, y_pred, _, _ = predict(model, loaders.test, device)
     test_m = M.compute(y_true, y_pred, NUM_CLASSES)
 

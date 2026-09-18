@@ -79,7 +79,7 @@ def load_run(run: str, root: Path, device: torch.device):
         raise UserError(f"{run_dir.name} 에 학습 결과(best.pt)가 없습니다.{hint}")
 
     try:
-        ckpt = torch.load(ckpt_path, map_location=device, weights_only=False)
+        ckpt = torch.load(ckpt_path, map_location=device, weights_only=True)
     except Exception as exc:  # 손상된 파일, 중간에 끊긴 저장 등
         raise UserError(
             f"{ckpt_path} 를 읽지 못했습니다 ({type(exc).__name__}).\n"
